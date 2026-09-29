@@ -1601,7 +1601,7 @@
 
         <div class="preset-dropdown-menu" id="presetDropdownMenu">
           <div class="preset-dropdown-header">
-            <span>⚡ СТУДИЙНЫЕ СЕТАПЫ (16)</span>
+            <span id="presetDropdownHeaderCount">⚡ СТУДИЙНЫЕ СЕТАПЫ (22)</span>
             <span>Клик для загрузки</span>
           </div>
 
@@ -1613,8 +1613,8 @@
             <button class="preset-dropdown-action-btn" onclick="createNewPresetFromCurrent()">
               ➕ Сохранить как новый
             </button>
-            <button class="preset-dropdown-action-btn secondary" onclick="resetPresetsToDefault()">
-              ↺ Сброс (16)
+            <button class="preset-dropdown-action-btn secondary preset-reset-btn-label" onclick="resetPresetsToDefault()">
+              ↺ Сброс (22)
             </button>
           </div>
         </div>
@@ -1640,7 +1640,7 @@
     <div class="mobile-sheet-handle"></div>
     <div class="mobile-sheet-header">
       <div class="mobile-sheet-title">
-        <span>⚡</span> СТУДИЙНЫЕ СЕТАПЫ <span class="tag">16 пресетов</span>
+        <span>⚡</span> СТУДИЙНЫЕ СЕТАПЫ <span class="tag" id="mobileSheetHeaderTag">22 пресета</span>
       </div>
       <button class="mobile-sheet-close-btn" type="button" onclick="closeMobilePresetSheet()" title="Закрыть">✕</button>
     </div>
@@ -1653,8 +1653,8 @@
       <button class="preset-dropdown-action-btn" onclick="createNewPresetFromCurrent()">
         ➕ Сохранить как новый
       </button>
-      <button class="preset-dropdown-action-btn secondary" onclick="resetPresetsToDefault()">
-        ↺ Сброс (16)
+      <button class="preset-dropdown-action-btn secondary preset-reset-btn-label" onclick="resetPresetsToDefault()">
+        ↺ Сброс (22)
       </button>
     </div>
   </div>
@@ -3201,12 +3201,174 @@
           materials: true,
           prompt: 'Уютный вязаный кардиган крупной вязки на модели с чашкой кофе у залитого теплым закатным солнцем окна'
         }
+      },
+      {
+        id: 'preset_glossy_beauty',
+        name: 'Glossy Beauty — журнальный бьюти-портрет',
+        data: {
+          mode: 'portrait-scratch',
+          hwTab: 'dslr',
+          camera: 'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
+          lens: 'Canon EF 85mm f/1.4L IS USM (Creamy editorial compression)',
+          shutter: '1/160s',
+          aperture: 'f/8.0',
+          iso: 'ISO 100',
+          focusFormat: 'AF-S single-point precision, uncompressed RAW',
+          colorGrading: 'Neutral commercial color profile with true-to-life skin tones',
+          filter: 'none',
+          lightingCategory: 'studio',
+          lightingSetup: 'Beauty dish lighting with honeycomb grid creating punchy directional contrast and circular iris catchlights',
+          angle: 'Eye-level, intimate direct perspective with balanced framing',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Крупный журнальный портрет от плеч, лицо почти фронтально, уверенный спокойный взгляд. Beauty dish спереди немного выше уровня глаз, деликатное заполнение теней снизу. Чёткие глаза и ресницы, естественная текстура кожи, аккуратные блики на скулах. Однородный светло-серый фон, без надписей.'
+        }
+      },
+      {
+        id: 'preset_natural_bw',
+        name: 'Natural B&W — естественный портрет в духе Peter Lindbergh',
+        data: {
+          mode: 'portrait-scratch',
+          hwTab: 'film_slr',
+          camera: 'Nikon F3 Professional 35mm SLR',
+          lens: 'Nikkor 50mm f/1.2 AI-s (Classic vintage optical glow)',
+          shutter: '1/250s',
+          aperture: 'f/5.6',
+          iso: 'ISO 400',
+          focusFormat: 'Manual Focus (MF), razor-sharp focal plane, RAW',
+          colorGrading: 'Shot on Kodak Tri-X 400 black and white film with rich contrast and silver grain',
+          filter: 'none',
+          lightingCategory: 'natural',
+          lightingSetup: 'Overcast moody daylight with shadowless milky diffusion and cold serene blue ambient bounce',
+          angle: 'Medium shot editorial framing with environmental context',
+          texture: 'Fine organic Kodak Tri-X silver-halide grain with deep velvet blacks and tactile paper texture',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: true,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Чёрно-белый портрет модели на улице в пасмурный день. Простая белая рубашка или тёмный жакет, непринуждённая поза, слегка растрёпанные волосы, живой взгляд. Минимальный макияж, естественная кожа, спокойный фон, ощущение пойманного настоящего момента.'
+        }
+      },
+      {
+        id: 'preset_soft_couture',
+        name: 'Soft Couture — романтическая съёмка в духе Paolo Roversi',
+        data: {
+          mode: 'portrait-scratch',
+          hwTab: 'mirrorless',
+          camera: 'Leica SL2 (47.3MP Full-Frame Maestro III)',
+          lens: 'Leica Summilux-SL 50mm f/1.4 ASPH (Legendary micro-contrast)',
+          shutter: '1/125s',
+          aperture: 'f/2.8',
+          iso: 'ISO 400',
+          focusFormat: 'AF-S single-point precision, uncompressed RAW',
+          colorGrading: 'Leica Cine-Look with muted organic color palette and velvety deep shadows',
+          filter: 'Tiffen Black Pro-Mist 1/8 subtle diffusion filter',
+          lightingCategory: 'natural',
+          lightingSetup: 'Soft directional northern window light with sheer linen curtain diffusion, creating gentle gradations across the subject',
+          angle: 'Medium shot editorial framing with environmental context',
+          texture: 'Ultra-clean medium-format digital fidelity with tactile micro-textures and subtle highlight halation',
+          photographer: 'Paolo Roversi',
+          includePhotographerMeta: true,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Поэтичный портрет модели в вечернем наряде, спокойная неподвижная поза, деликатный взгляд. Мягкий боковой свет из окна, приглушённый серо-бежевый фон, плавное растворение теней. Глаза остаются в фокусе, ткань и фон мягче, сдержанная палитра, лёгкое оптическое свечение.'
+        }
+      },
+      {
+        id: 'preset_fashion_cover',
+        name: 'Fashion Cover — чёткий студийный кадр для обложки',
+        data: {
+          mode: 'portrait-scratch',
+          hwTab: 'mirrorless',
+          camera: 'Hasselblad X2D 100C (100MP Medium Format BSI CMOS sensor)',
+          lens: 'Hasselblad XCD 55mm f/2.5 V (Medium-format optical perfection)',
+          shutter: '1/125s',
+          aperture: 'f/8.0',
+          iso: 'ISO 100',
+          focusFormat: 'AF-S single-point precision, uncompressed RAW',
+          colorGrading: 'Hasselblad Natural Colour Solution (HNCS) with unmatched skin rendition',
+          filter: 'none',
+          lightingCategory: 'studio',
+          lightingSetup: 'Sculpted 3-point studio lighting with high key octabox, subtle rim hair-light, and black negative fill flags',
+          angle: 'medium_long: Medium-long shot capturing model, clothing drape and room atmosphere',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Fashion-портрет для обложки глянцевого журнала, кадр от головы до середины бёдер. Скульптурная поза, выразительный силуэт одежды, прямой взгляд в камеру. Чистый однотонный фон, мягкий основной свет и тонкое отделение плеч контровым светом. Лицо и одежда детализированы. Свободное пространство над головой, без текста и логотипов.'
+        }
+      },
+      {
+        id: 'preset_sculpted_portrait',
+        name: 'Sculpted Portrait — драматичный портрет девушки или мужчины',
+        data: {
+          mode: 'portrait-scratch',
+          hwTab: 'dslr',
+          camera: 'Nikon D850 (45.7MP Back-Illuminated Full-Frame)',
+          lens: 'Nikon AF-S NIKKOR 105mm f/1.4E ED (Elite portrait glass)',
+          shutter: '1/160s',
+          aperture: 'f/5.6',
+          iso: 'ISO 100',
+          focusFormat: 'AF-S single-point precision, uncompressed RAW',
+          colorGrading: 'Rich moody low-saturation editorial grade with warm shadow tint',
+          filter: 'none',
+          lightingCategory: 'dramatic',
+          lightingSetup: 'Classic Rembrandt lighting with a distinctive illuminated triangle on the shadowed cheek and deep velvet background falloff',
+          angle: 'Eye-level, intimate direct perspective with balanced framing',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Поясной психологический портрет в лаконичном тёмном костюме. Корпус слегка развёрнут, лицо обращено к камере. Рембрандтовский свет образует небольшой световой треугольник на теневой щеке. Глубокий серый фон, выразительная форма лица, сохранённые детали в тенях, сдержанное уверенное выражение.'
+        }
+      },
+      {
+        id: 'preset_golden_editorial',
+        name: 'Golden Editorial — тёплая журнальная съёмка на улице',
+        data: {
+          mode: 'portrait-scratch',
+          hwTab: 'mirrorless',
+          camera: 'Sony A7R V (61MP Full-Frame Exmor R sensor)',
+          lens: 'Sony FE 85mm f/1.4 GM II (Flawless bokeh & sharpness)',
+          shutter: '1/500s',
+          aperture: 'f/2.8',
+          iso: 'ISO 200',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          colorGrading: 'Clean 16-bit color gradation with hyper-accurate tonality and zero banding',
+          filter: 'none',
+          lightingCategory: 'natural',
+          lightingSetup: 'Golden hour low-sun natural light spilling from behind, casting elongated warm amber shadows and brilliant rim illumination',
+          angle: 'Medium shot editorial framing with environmental context',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Поясной fashion-портрет на закате, модель слегка поворачивается к камере, лёгкий ветер двигает волосы. Солнце позади и сбоку создаёт золотистый контур, мягкое отражённое заполнение освещает лицо. Глаза резкие, фон плавно размыт, оттенок кожи естественный, без чрезмерной оранжевой тонировки.'
+        }
       }
     ];
 
     function getPresetsList() {
       try {
-        const raw = localStorage.getItem('studio_vault_presets_v4');
+        const raw = localStorage.getItem('studio_vault_presets_v5');
         if (raw) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -3217,7 +3379,7 @@
 
     function savePresetsList(list) {
       try {
-        localStorage.setItem('studio_vault_presets_v4', JSON.stringify(list));
+        localStorage.setItem('studio_vault_presets_v5', JSON.stringify(list));
       } catch (e) {}
     }
 
@@ -3271,6 +3433,13 @@
 
       if (listEl) listEl.innerHTML = itemsHtml;
       if (mobileListEl) mobileListEl.innerHTML = itemsHtml;
+
+      const countHeader = document.getElementById('presetDropdownHeaderCount');
+      if (countHeader) countHeader.textContent = `⚡ СТУДИЙНЫЕ СЕТАПЫ (${presets.length})`;
+      const mobileHeaderTag = document.getElementById('mobileSheetHeaderTag');
+      if (mobileHeaderTag) mobileHeaderTag.textContent = `${presets.length} пресетов`;
+      const resetButtons = document.querySelectorAll('.preset-reset-btn-label');
+      resetButtons.forEach(btn => btn.textContent = `↺ Сброс (${presets.length})`);
     }
 
     function setSelectFuzzy(selectId, targetVal) {
@@ -3485,12 +3654,13 @@
     }
 
     function resetPresetsToDefault() {
-      if (!confirm('Сбросить панель сетапов к исходным 16 сетапам? Все ваши изменения в сетапах будут сброшены.')) return;
+      if (!confirm(`Сбросить панель сетапов к исходным ${defaultStudioPresets.length} сетапам? Все ваши изменения в сетапах будут сброшены.`)) return;
+      localStorage.removeItem('studio_vault_presets_v5');
       localStorage.removeItem('studio_vault_presets_v4');
       localStorage.removeItem('studio_vault_presets_v3');
       localStorage.removeItem('studio_vault_presets_v2');
       renderPresetVault();
-      showToast('↺ Сетапы сброшены к 16 оригинальным.');
+      showToast(`↺ Сетапы сброшены к ${defaultStudioPresets.length} оригинальным.`);
     }
 
     // Theme logic (Light / Dark)
