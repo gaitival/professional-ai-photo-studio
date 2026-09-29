@@ -1070,20 +1070,25 @@
       border-color: #bfdbfe;
       color: #2563eb;
     }
+    body.light-theme .mobile-preset-sheet {
+      background: #ffffff;
+      border-top-color: #cbd5e1;
+      box-shadow: 0 -10px 45px rgba(0, 0, 0, 0.15);
+    }
+    body.light-theme .mobile-preset-backdrop {
+      background: rgba(15, 23, 42, 0.45);
+    }
     body.light-theme .mobile-sheet-close-btn {
       background: #f1f5f9;
       border-color: #cbd5e1;
       color: #0f172a;
     }
     body.light-theme .mobile-sheet-handle {
-      background: #94a3b8;
-    }
-    body.light-theme .preset-dropdown-backdrop {
-      background: rgba(15, 23, 42, 0.5);
+      background: #cbd5e1;
     }
 
     /* ========================================================
-       STUDIO PRESETS DROPDOWN (IN HEADER & MOBILE BOTTOM SHEET)
+       DESKTOP STUDIO PRESETS DROPDOWN (IN HEADER)
        ======================================================== */
     .preset-dropdown-container {
       position: relative;
@@ -1112,29 +1117,6 @@
       filter: brightness(1.12);
       transform: translateY(-1px);
       box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
-    }
-
-    .preset-dropdown-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      z-index: 999;
-      opacity: 0;
-      transition: opacity 0.25s ease;
-    }
-    .preset-dropdown-backdrop.open {
-      display: block;
-      opacity: 1;
-    }
-
-    .mobile-sheet-handle {
-      display: none;
-    }
-    .mobile-sheet-close-btn {
-      display: none;
     }
 
     .preset-dropdown-menu {
@@ -1172,60 +1154,142 @@
     }
 
     @media (max-width: 900px) {
-      .preset-dropdown-container:hover .preset-dropdown-menu {
-        display: none; /* Disable hover on touch screens */
-      }
       .preset-dropdown-menu {
-        position: fixed !important;
-        top: auto !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100vw !important;
-        min-width: 100vw !important;
-        max-width: 100vw !important;
-        max-height: 82vh !important;
-        border-radius: 20px 20px 0 0 !important;
-        border-bottom: none !important;
-        border-left: none !important;
-        border-right: none !important;
-        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.7) !important;
-        transform: translateY(105%);
-        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.28s ease;
-        display: flex !important;
-        visibility: hidden;
-        z-index: 1000 !important;
-        padding: 12px 16px max(16px, env(safe-area-inset-bottom)) !important;
-      }
-      .preset-dropdown-menu.open {
-        visibility: visible !important;
-        transform: translateY(0) !important;
-      }
-      .preset-dropdown-menu::before {
         display: none !important;
       }
-      .mobile-sheet-handle {
-        display: block;
-        width: 44px;
-        height: 5px;
-        border-radius: 3px;
-        background: #64748b;
-        opacity: 0.5;
-        margin: 2px auto 10px auto;
+    }
+
+    /* ========================================================
+       MOBILE PRESET BOTTOM SHEET (DIRECT CHILD OF BODY)
+       ======================================================== */
+    .mobile-preset-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 9998;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .mobile-preset-backdrop.open {
+      display: block;
+      opacity: 1;
+    }
+
+    .mobile-preset-sheet {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100vw;
+      max-height: 85vh;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border-color);
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -10px 45px rgba(0, 0, 0, 0.85);
+      z-index: 9999;
+      transform: translateY(105%);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-direction: column;
+      padding: 12px 16px max(16px, env(safe-area-inset-bottom, 16px));
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 900px) {
+      .mobile-preset-sheet {
+        display: flex;
       }
-      .mobile-sheet-close-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        border: 1px solid var(--border-color);
-        background: var(--bg-card);
-        color: var(--text-main);
-        font-size: 14px;
-        cursor: pointer;
+      .mobile-preset-sheet.open {
+        transform: translateY(0);
       }
+    }
+
+    @media (min-width: 901px) {
+      .mobile-preset-backdrop,
+      .mobile-preset-sheet {
+        display: none !important;
+      }
+    }
+
+    .mobile-sheet-handle {
+      width: 44px;
+      height: 5px;
+      border-radius: 3px;
+      background: #64748b;
+      opacity: 0.5;
+      margin: 2px auto 6px auto;
+      flex-shrink: 0;
+    }
+
+    .mobile-sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+
+    .mobile-sheet-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mobile-sheet-title .tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .mobile-sheet-close-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: 15px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .mobile-sheet-close-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .mobile-sheet-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      flex: 1;
+      padding-right: 2px;
+    }
+
+    .mobile-sheet-footer {
+      display: flex;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+      flex-shrink: 0;
     }
 
     @keyframes dropdownFadeIn {
@@ -1529,17 +1593,16 @@
     </div>
 
     <div class="header-actions">
-      <!-- Dropdown: STUDIO PRESETS (unfolds directly on hover or tap) -->
+      <!-- Dropdown: STUDIO PRESETS (Desktop Dropdown) -->
       <div class="preset-dropdown-container" id="presetDropdownContainer">
         <button class="preset-dropdown-trigger" id="presetDropdownBtn" type="button" onclick="togglePresetDropdown()">
           ⚡ STUDIO PRESETS <span style="font-size: 10px; margin-left: 2px;">▼</span>
         </button>
 
         <div class="preset-dropdown-menu" id="presetDropdownMenu">
-          <div class="mobile-sheet-handle"></div>
           <div class="preset-dropdown-header">
             <span>⚡ СТУДИЙНЫЕ СЕТАПЫ (16)</span>
-            <button class="mobile-sheet-close-btn" type="button" onclick="togglePresetDropdown(false)" title="Закрыть">✕</button>
+            <span>Клик для загрузки</span>
           </div>
 
           <div class="preset-dropdown-list" id="presetDropdownList">
@@ -1571,8 +1634,30 @@
     </div>
   </header>
 
-  <!-- Mobile Preset Drawer Backdrop Overlay -->
-  <div class="preset-dropdown-backdrop" id="presetDropdownBackdrop" onclick="togglePresetDropdown(false)"></div>
+  <!-- Mobile Preset Bottom Sheet & Backdrop (Direct children of body, outside header) -->
+  <div class="mobile-preset-backdrop" id="mobilePresetBackdrop" onclick="closeMobilePresetSheet()"></div>
+  <div class="mobile-preset-sheet" id="mobilePresetSheet">
+    <div class="mobile-sheet-handle"></div>
+    <div class="mobile-sheet-header">
+      <div class="mobile-sheet-title">
+        <span>⚡</span> СТУДИЙНЫЕ СЕТАПЫ <span class="tag">16 пресетов</span>
+      </div>
+      <button class="mobile-sheet-close-btn" type="button" onclick="closeMobilePresetSheet()" title="Закрыть">✕</button>
+    </div>
+
+    <div class="mobile-sheet-list" id="mobilePresetList">
+      <!-- Populated dynamically by JavaScript -->
+    </div>
+
+    <div class="mobile-sheet-footer">
+      <button class="preset-dropdown-action-btn" onclick="createNewPresetFromCurrent()">
+        ➕ Сохранить как новый
+      </button>
+      <button class="preset-dropdown-action-btn secondary" onclick="resetPresetsToDefault()">
+        ↺ Сброс (16)
+      </button>
+    </div>
+  </div>
 
   <!-- Mobile Segmented Tabs Bar (visible <= 900px) -->
   <div class="mobile-tabs-bar" id="mobileTabsBar">
@@ -1962,7 +2047,7 @@
     <button class="mobile-bottom-btn primary" id="mobileBottomCopyBtn" onclick="copyFinalPrompt()">
       📋 Скопировать <span id="mobileBottomBadge">0 сл.</span>
     </button>
-    <button class="mobile-bottom-btn" onclick="togglePresetDropdown(true)">
+    <button class="mobile-bottom-btn" onclick="openMobilePresetSheet()">
       ⚡ Сетапы
     </button>
     <button class="mobile-bottom-btn secondary" id="mobileBottomViewBtn" onclick="toggleMobileTab()">
@@ -3149,9 +3234,9 @@
     function renderPresetVault() {
       const presets = getPresetsList();
       const listEl = document.getElementById('presetDropdownList');
-      if (!listEl) return;
+      const mobileListEl = document.getElementById('mobilePresetList');
 
-      listEl.innerHTML = presets.map((p) => {
+      const itemsHtml = presets.map((p) => {
         const camShort = p.data.camera ? p.data.camera.split('(')[0].trim() : 'Camera';
         const lensShort = p.data.lens ? p.data.lens.split('(')[0].trim() : 'Lens';
         const lightShort = p.data.lightingCategory || 'Light';
@@ -3183,6 +3268,9 @@
           </div>
         `;
       }).join('');
+
+      if (listEl) listEl.innerHTML = itemsHtml;
+      if (mobileListEl) mobileListEl.innerHTML = itemsHtml;
     }
 
     function setSelectFuzzy(selectId, targetVal) {
@@ -3269,7 +3357,7 @@
 
       updatePrompt();
       if (window.innerWidth <= 900) {
-        togglePresetDropdown(false);
+        closeMobilePresetSheet();
       }
       showToast(`⭐ Сетап «${preset.name}» применён!`);
     }
@@ -3562,39 +3650,55 @@
       }
     }
 
-    function togglePresetDropdown(forceState) {
-      const menu = document.getElementById('presetDropdownMenu');
-      const backdrop = document.getElementById('presetDropdownBackdrop');
-      if (!menu) return;
+    function openMobilePresetSheet() {
+      const sheet = document.getElementById('mobilePresetSheet');
+      const backdrop = document.getElementById('mobilePresetBackdrop');
+      if (sheet) sheet.classList.add('open');
+      if (backdrop) backdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
 
-      const shouldOpen = (forceState !== undefined) ? forceState : !menu.classList.contains('open');
+    function closeMobilePresetSheet() {
+      const sheet = document.getElementById('mobilePresetSheet');
+      const backdrop = document.getElementById('mobilePresetBackdrop');
+      if (sheet) sheet.classList.remove('open');
+      if (backdrop) backdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
 
-      if (shouldOpen) {
-        menu.classList.add('open');
-        if (backdrop) backdrop.classList.add('open');
-        document.body.style.overflow = (window.innerWidth <= 900) ? 'hidden' : '';
+    function togglePresetDropdown() {
+      if (window.innerWidth <= 900) {
+        const sheet = document.getElementById('mobilePresetSheet');
+        if (sheet && sheet.classList.contains('open')) {
+          closeMobilePresetSheet();
+        } else {
+          openMobilePresetSheet();
+        }
       } else {
-        menu.classList.remove('open');
-        if (backdrop) backdrop.classList.remove('open');
-        document.body.style.overflow = '';
+        const menu = document.getElementById('presetDropdownMenu');
+        if (menu) menu.classList.toggle('open');
       }
     }
 
     function initMobileResponsive() {
-      // Setup click listener outside preset dropdown
+      // Setup click listener outside desktop preset dropdown
       document.addEventListener('click', (e) => {
-        const menu = document.getElementById('presetDropdownMenu');
-        const container = document.getElementById('presetDropdownContainer');
-        const bottomBtn = document.getElementById('mobileBottomBar');
-        if (!menu || !menu.classList.contains('open')) return;
-        if (container && container.contains(e.target)) return;
-        if (bottomBtn && bottomBtn.contains(e.target)) return;
-        togglePresetDropdown(false);
+        if (window.innerWidth > 900) {
+          const menu = document.getElementById('presetDropdownMenu');
+          const container = document.getElementById('presetDropdownContainer');
+          if (!menu || !menu.classList.contains('open')) return;
+          if (container && container.contains(e.target)) return;
+          menu.classList.remove('open');
+        }
       });
 
-      // Escape key to close modal
+      // Escape key to close modal/drawer
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') togglePresetDropdown(false);
+        if (e.key === 'Escape') {
+          closeMobilePresetSheet();
+          const menu = document.getElementById('presetDropdownMenu');
+          if (menu) menu.classList.remove('open');
+        }
       });
 
       // Handle resize events
@@ -3612,7 +3716,7 @@
               output.style.width = '480px';
             }
           }
-          togglePresetDropdown(false);
+          closeMobilePresetSheet();
           document.body.style.overflow = '';
         } else {
           setMobileTab(currentMobileTab);
