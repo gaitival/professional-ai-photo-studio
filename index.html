@@ -1,0 +1,3079 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Studio — AI Meta-Prompt Generator for Google Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #0c0e12;
+      --bg-panel: #13171e;
+      --bg-card: #181d26;
+      --bg-input: #0f131a;
+      --border-color: #242b38;
+      --border-focus: #3b82f6;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Bar */
+    header {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.35);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+      border: 1px solid transparent;
+      outline: none;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border-color: var(--border-color);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover {
+      background: #202734;
+      border-color: #384252;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4f91ff, #1d4ed8);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+    }
+
+    .btn-emerald {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: white;
+    }
+
+    /* Layout */
+    .studio-container {
+      display: flex;
+      flex-direction: row;
+      flex: 1;
+      height: calc(100vh - 65px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .controls-panel {
+      flex: 1 1 0;
+      min-width: 360px;
+      overflow-y: auto;
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .panel-resizer {
+      width: 7px;
+      cursor: col-resize;
+      background: var(--border-color);
+      position: relative;
+      user-select: none;
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+      flex-shrink: 0;
+      z-index: 40;
+    }
+
+    .panel-resizer:hover, .panel-resizer.dragging {
+      background: var(--accent-blue);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+
+    .panel-resizer::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 3px;
+      height: 36px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    @media (max-width: 900px) {
+      .studio-container {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+      }
+      .panel-resizer {
+        display: none;
+      }
+      .output-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-main);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27303f;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3a475d;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #cbd5e1;
+    }
+
+    .card-title span.tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Mode Pill Selector */
+    .pill-group {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: var(--bg-card);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    @media (max-width: 800px) {
+      .pill-group {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .pill-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .pill-btn small {
+      display: block;
+      font-size: 10px;
+      opacity: 0.7;
+      margin-top: 2px;
+      font-weight: normal;
+    }
+
+    .pill-btn.active {
+      background: var(--accent-blue);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+    }
+
+    /* Grid Form Controls */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 700px) {
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      padding: 10px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.5;
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 14px;
+      padding-right: 34px;
+    }
+
+    /* Switch Tabs inside Hardware */
+    .hardware-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+      margin-bottom: 8px;
+      overflow-x: auto;
+    }
+
+    .hw-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .hw-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .hw-tab-btn.active {
+      color: var(--accent-blue);
+      background: rgba(59, 130, 246, 0.12);
+      border-bottom: 2px solid var(--accent-blue);
+    }
+
+    /* Toggle switches */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .toggle-row:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .toggle-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      pointer-events: none;
+    }
+
+    .toggle-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .toggle-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #334155;
+      transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      border-radius: 24px;
+      border: 1px solid #475569;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      bottom: 2px;
+      background-color: #ffffff;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+    }
+
+    .switch input:checked + .slider {
+      background-color: #2563eb !important;
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.55) !important;
+    }
+
+    .switch input:checked + .slider:before {
+      transform: translateX(20px);
+      background-color: #ffffff;
+    }
+
+    /* Right Side: Output Inspector */
+    .output-panel {
+      width: 480px;
+      min-width: 320px;
+      max-width: 75vw;
+      flex-shrink: 0;
+      background: var(--bg-panel);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .output-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .output-header h3 {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stats-badge {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .output-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .prompt-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 320px;
+      max-height: 480px;
+      overflow-y: auto;
+      user-select: all;
+    }
+
+    .prompt-box .highlight-style {
+      color: #a78bfa;
+    }
+    .prompt-box .highlight-subject {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+    .prompt-box .highlight-tech {
+      color: #34d399;
+    }
+    .prompt-box .highlight-lighting {
+      color: #fbbf24;
+    }
+
+    .breakdown-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+    .breakdown-row b {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .output-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-card);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .copy-btn-main {
+      width: 100%;
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: white;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(37, 99, 235, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn-main:hover {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(37, 99, 235, 0.6);
+    }
+
+    .copy-btn-main.copied {
+      background: linear-gradient(135deg, #059669, #10b981) !important;
+      box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4) !important;
+    }
+
+    .footer-secondary-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      border: 1px solid var(--accent-emerald);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      pointer-events: none;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ========================================================
+       LIGHT THEME OVERRIDES
+       ======================================================== */
+    body.light-theme {
+      --bg-main: #f8fafc;
+      --bg-panel: #ffffff;
+      --bg-card: #f1f5f9;
+      --bg-input: #ffffff;
+      --border-color: #cbd5e1;
+      --border-focus: #2563eb;
+      --accent-blue: #2563eb;
+      --accent-purple: #7c3aed;
+      --accent-amber: #d97706;
+      --accent-emerald: #059669;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    }
+
+    body.light-theme header {
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom-color: var(--border-color);
+    }
+
+    body.light-theme .brand-title {
+      color: #0f172a;
+    }
+
+    body.light-theme select,
+    body.light-theme input[type="text"],
+    body.light-theme textarea {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: #cbd5e1;
+    }
+
+    body.light-theme select:focus,
+    body.light-theme input[type="text"]:focus,
+    body.light-theme textarea:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    body.light-theme .btn-secondary {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      color: #1e293b;
+    }
+
+    body.light-theme .btn-secondary:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    body.light-theme .card {
+      background: #ffffff;
+      border-color: #e2e8f0;
+    }
+
+    body.light-theme .card-header {
+      border-bottom-color: rgba(0, 0, 0, 0.06);
+    }
+
+    body.light-theme .card-title {
+      color: #1e293b;
+    }
+
+    body.light-theme .pill-group,
+    body.light-theme .hw-tabs {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+    }
+
+    body.light-theme .pill-btn,
+    body.light-theme .hw-tab-btn {
+      color: #475569;
+    }
+
+    body.light-theme .pill-btn.active,
+    body.light-theme .hw-tab-btn.active {
+      background: var(--accent-blue);
+      color: #ffffff;
+    }
+
+    body.light-theme .pill-btn:hover:not(.active),
+    body.light-theme .hw-tab-btn:hover:not(.active) {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    body.light-theme .prompt-box {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      color: #1e293b;
+    }
+
+    body.light-theme .prompt-box .highlight-style { color: #6d28d9; }
+    body.light-theme .prompt-box .highlight-subject { color: #0284c7; font-weight: 600; }
+    body.light-theme .prompt-box .highlight-tech { color: #047857; }
+    body.light-theme .prompt-box .highlight-lighting { color: #b45309; }
+
+    body.light-theme .breakdown-section {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    body.light-theme .output-footer {
+      background: #ffffff;
+      border-top-color: #e2e8f0;
+    }
+
+    body.light-theme .panel-resizer {
+      background: #cbd5e1;
+    }
+    body.light-theme .panel-resizer:hover,
+    body.light-theme .panel-resizer.dragging {
+      background: #2563eb;
+    }
+    body.light-theme .panel-resizer::after {
+      background: rgba(0, 0, 0, 0.35);
+    }
+
+    body.light-theme .slider {
+      background-color: #cbd5e1;
+      border-color: #94a3b8;
+    }
+
+    body.light-theme .switch input:checked + .slider {
+      background-color: #2563eb !important;
+      border-color: #1d4ed8 !important;
+      box-shadow: 0 0 10px rgba(37, 99, 235, 0.4) !important;
+    }
+
+    body.light-theme .preset-dropdown-menu {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    body.light-theme .preset-item {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    body.light-theme .preset-item:hover {
+      background: #eff6ff;
+      border-color: #3b82f6;
+    }
+
+    body.light-theme .preset-item-title {
+      color: #0f172a;
+    }
+
+    body.light-theme .preset-item-tag {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    body.light-theme .preset-dropdown-action-btn.secondary {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #475569;
+    }
+
+    body.light-theme .stats-badge {
+      background: rgba(0, 0, 0, 0.05);
+      color: #64748b;
+    }
+
+    body.light-theme .card-title span.tag {
+      background: rgba(0, 0, 0, 0.05);
+      color: #64748b;
+    }
+
+    body.light-theme ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+    }
+    body.light-theme ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    body.light-theme #toast {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: #10b981;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    body.light-theme .preset-item-prompt-snippet {
+      color: #64748b;
+    }
+
+    /* ========================================================
+       STUDIO PRESETS DROPDOWN (IN HEADER)
+       ======================================================== */
+    .preset-dropdown-container {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .preset-dropdown-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 700;
+      font-size: 13px;
+      background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      border-radius: var(--radius-sm);
+      padding: 8px 16px;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .preset-dropdown-trigger:hover {
+      filter: brightness(1.12);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+    }
+
+    .preset-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      min-width: 480px;
+      max-width: 540px;
+      max-height: calc(100vh - 90px);
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+      animation: dropdownFadeIn 0.15s ease-out;
+    }
+
+    /* Hover buffer to prevent closing when moving cursor between button and menu */
+    .preset-dropdown-menu::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 0;
+      right: 0;
+      height: 10px;
+    }
+
+    .preset-dropdown-container:hover .preset-dropdown-menu {
+      display: flex;
+    }
+
+    @keyframes dropdownFadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .preset-dropdown-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .preset-dropdown-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .preset-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .preset-item:hover {
+      border-color: var(--accent-blue);
+      background: rgba(59, 130, 246, 0.08);
+      transform: translateX(2px);
+    }
+
+    .preset-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .preset-item-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preset-item-tools {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .preset-item-tool-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .preset-item-tool-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .preset-item-tool-btn.danger:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .preset-item-desc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .preset-item-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+    }
+
+    .preset-item-prompt-snippet {
+      font-size: 11px;
+      color: var(--text-dim);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-top: 3px;
+      font-style: italic;
+    }
+
+    .preset-dropdown-footer {
+      display: flex;
+      gap: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .preset-dropdown-action-btn {
+      flex: 1;
+      padding: 8px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px dashed var(--accent-blue);
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--accent-blue);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .preset-dropdown-action-btn:hover {
+      background: rgba(59, 130, 246, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .preset-dropdown-action-btn.secondary {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-muted);
+    }
+
+    .preset-dropdown-action-btn.secondary:hover {
+      color: var(--text-main);
+      border-color: #64748b;
+    }
+
+    /* ========================================================
+       THEME TOGGLE BUTTON
+       ======================================================== */
+    .theme-toggle-btn {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--accent-blue);
+      transform: scale(1.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">📸</div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="brand-title">PHOTO STUDIO</span>
+          <span class="brand-badge">PROMPT GENERATOR</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-dim);">Оптимизировано для Google Flow, Imagen 3, Flux & Midjourney</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Dropdown: STUDIO PRESETS (unfolds directly on hover at this button) -->
+      <div class="preset-dropdown-container" id="presetDropdownContainer">
+        <button class="preset-dropdown-trigger" id="presetDropdownBtn" type="button">
+          ⚡ STUDIO PRESETS <span style="font-size: 10px; margin-left: 2px;">▼</span>
+        </button>
+
+        <div class="preset-dropdown-menu" id="presetDropdownMenu">
+          <div class="preset-dropdown-header">
+            <span>⚡ СТУДИЙНЫЕ СЕТАПЫ</span>
+            <span>Клик для загрузки</span>
+          </div>
+
+          <div class="preset-dropdown-list" id="presetDropdownList">
+            <!-- Populated dynamically by JavaScript -->
+          </div>
+
+          <div class="preset-dropdown-footer">
+            <button class="preset-dropdown-action-btn" onclick="createNewPresetFromCurrent()">
+              ➕ Сохранить текущие как новый сетап
+            </button>
+            <button class="preset-dropdown-action-btn secondary" onclick="resetPresetsToDefault()">
+              ↺ Сброс к 16 сетапам
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-secondary" onclick="randomizeSettings()" title="Сгенерировать случайный художественный сетап">
+        🎲 Случайный сетап
+      </button>
+      <button class="btn btn-secondary" onclick="resetToDefaults()" title="Сбросить все настройки к начальным">
+        ↺ Сбросить
+      </button>
+
+      <!-- Theme Switcher (Dark / Light) -->
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Тёмная тема (нажмите для включения светлой)">
+        <span id="themeIcon">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="studio-container">
+    
+    <!-- Controls (Left Panel) -->
+    <div class="controls-panel">
+
+      <!-- 1. MODE SELECTION (Портрет / Предмет / С нуля / По референсу) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🎯</span> Режим генерации (Task Branch)
+            <span class="tag">Branch Logic</span>
+          </div>
+        </div>
+
+        <div class="pill-group">
+          <button class="pill-btn active" data-mode="portrait-scratch" onclick="setMode('portrait-scratch')">
+            Portrait
+            <small>С нуля (Scratch)</small>
+          </button>
+          <button class="pill-btn" data-mode="portrait-ref" onclick="setMode('portrait-ref')">
+            Portrait
+            <small>По референсу</small>
+          </button>
+          <button class="pill-btn" data-mode="product-scratch" onclick="setMode('product-scratch')">
+            Product
+            <small>С нуля (Scratch)</small>
+          </button>
+          <button class="pill-btn" data-mode="product-ref" onclick="setMode('product-ref')">
+            Product
+            <small>По референсу</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. SCENE & SUBJECT (Главный промпт) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📝</span> Сюжет и объект съёмки (Image Prompt)
+            <span class="tag">Core Content</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label for="subjectPrompt" id="subjectLabel">Описание сцены / Модель / Персонаж</label>
+            <span class="hint" id="subjectHint">Внешность, поза, одежда, интерьер (подсказка исчезает при вводе)</span>
+          </div>
+          <textarea id="subjectPrompt" placeholder="Например: Женщина в уютной домашней одежде сидит на краю кровати, мягкий утренний свет из окна..." oninput="updatePrompt()"></textarea>
+        </div>
+      </div>
+
+      <!-- 3. PHOTOGRAPHER & AESTHETIC VISION -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🎨</span> Стиль и видение фотографа
+            <span class="tag">Artistic Signature</span>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="photographerSelect">Мастер фотографии</label>
+            <select id="photographerSelect" onchange="onPhotographerSelectChange()">
+              <option value="Peter Lindbergh">Peter Lindbergh (Честный Ч/Б, естественная красота, кинематограф)</option>
+              <option value="Helmut Newton">Helmut Newton (Драматичный свет, мощная контрастность, эротизм)</option>
+              <option value="Annie Leibovitz">Annie Leibovitz (Глубокие тона, живописный свет, грандиозные портреты)</option>
+              <option value="Paolo Roversi">Paolo Roversi (Поэтичный размытый свет, полароидный винтаж, сказка)</option>
+              <option value="Steven Meisel">Steven Meisel (Высокая мода, идеальный студийный глянец)</option>
+              <option value="Tim Walker">Tim Walker (Сюрреализм, причудливые цвета, сказочный гротеск)</option>
+              <option value="Juergen Teller">Juergen Teller (Сырой реализм, прямая вспышка, анти-гламур)</option>
+              <option value="Richard Avedon">Richard Avedon (Минимализм, белый фон, обнаженная эмоция)</option>
+              <option value="Mario Testino">Mario Testino (Сочный свет, динамика, гламурная роскошь)</option>
+              <option value="Gregory Crewdson">Gregory Crewdson (Кинематографичная меланхолия, сумерки, сложный свет)</option>
+              <option value="Nan Goldin">Nan Goldin (Сырая интимность, плёночный гранж 90-х)</option>
+              <option value="custom">-- Свой фотограф или стиль --</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="customPhotographerWrap" style="display: none;">
+            <label for="customPhotographer">Имя своего фотографа / студии</label>
+            <input type="text" id="customPhotographer" placeholder="например, Roger Deakins, Gordon Parks..." oninput="updatePrompt()">
+          </div>
+        </div>
+
+        <div class="toggle-row" onclick="toggleCheckboxRow('includePhotographerMeta', event)">
+          <div class="toggle-text">
+            <span class="toggle-title">Внедрить мета-инструкцию стиля фотографа</span>
+            <span class="toggle-sub">Заставляет ИИ полностью эмулировать уникальную визуальную пластику и оптику автора</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="includePhotographerMeta" checked onchange="updatePrompt()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 4. HARDWARE & OPTICS (Камера, Объектив, Плёнка, Фильтры) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📷</span> Фотооборудование и оптика (Camera & Gear)
+            <span class="tag">Optics & LUT</span>
+          </div>
+        </div>
+
+        <!-- Hardware category tabs -->
+        <div class="hardware-tabs">
+          <button class="hw-tab-btn active" onclick="setHardwareTab('dslr')">DSLR / Digital Full-Frame</button>
+          <button class="hw-tab-btn" onclick="setHardwareTab('mirrorless')">Medium Format / Mirrorless</button>
+          <button class="hw-tab-btn" onclick="setHardwareTab('film_slr')">Film SLR (Плёнка 35mm / 120)</button>
+          <button class="hw-tab-btn" onclick="setHardwareTab('film_range')">Film Rangefinder (Contax / Leica)</button>
+          <button class="hw-tab-btn" onclick="setHardwareTab('polaroid')">Instant / Polaroid</button>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="cameraSelect">Камера / Сенсор</label>
+            <select id="cameraSelect" onchange="updatePrompt()">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="lensSelect">Объектив / Фокусное расстояние</label>
+            <select id="lensSelect" onchange="updatePrompt()">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="colorGradingSelect">Цветокоррекция / Эмуляция плёнки (Film Stock / LUT)</label>
+            <select id="colorGradingSelect" onchange="updatePrompt()">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="filterSelect">Оптический фильтр на объектив</label>
+            <select id="filterSelect" onchange="updatePrompt()">
+              <option value="none">Без фильтра (Clean Optical)</option>
+              <option value="Tiffen Black Pro-Mist 1/4 filter applied for ultra-subtle highlight bloom and luxurious optical softness">Tiffen Black Pro-Mist 1/4 (Мягкое свечение бликов)</option>
+              <option value="Tiffen Black Pro-Mist 1/8 subtle diffusion filter">Tiffen Black Pro-Mist 1/8 (Едва заметная диффузия)</option>
+              <option value="Anamorphic Streak Filter with delicate horizontal blue flares">Anamorphic Streak Filter (Синие анаморфные блики)</option>
+              <option value="Hollywood Black Magic 1/8 diffusion filter">Hollywood Black Magic 1/8 (Киношная мягкость кожи)</option>
+              <option value="1.33x anamorphic squeeze lens adapter with characteristic oval bokeh">1.33x Anamorphic Lens (Овальное боке)</option>
+              <option value="Circular Polarizer (CPL) eliminating specular glare and deepening rich contrast">Поляризационный фильтр CPL (Глубокий контраст)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="exposureShutter">Выдержка (Shutter)</label>
+            <select id="exposureShutter" onchange="updatePrompt()">
+              <option value="1/125s">1/125s (Стандартный студийный кадр, как в Weavy)</option>
+              <option value="1/160s">1/160s (Четкий портрет)</option>
+              <option value="1/250s">1/250s (Заморозка динамики)</option>
+              <option value="1/60s">1/60s (Легкое ощущение естественного движения)</option>
+              <option value="1/500s">1/500s (Высокоскоростной затвор)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="exposureAperture">Диафрагма (Aperture)</label>
+            <select id="exposureAperture" onchange="updatePrompt()">
+              <option value="f/2.0">f/2.0 (Естественная мягкая глубина, как в Weavy)</option>
+              <option value="f/1.4">f/1.4 (Глубокое кинематографичное боке)</option>
+              <option value="f/1.2">f/1.2 (Экстремальное кремовое боке)</option>
+              <option value="f/2.8">f/2.8 (Баланс резкости и размытия)</option>
+              <option value="f/5.6">f/5.6 (Четкие детали окружения)</option>
+              <option value="f/8.0">f/8.0 (Коммерческая студийная резкость)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="exposureISO">Чувствительность (ISO)</label>
+            <select id="exposureISO" onchange="updatePrompt()">
+              <option value="Auto ISO (up to 6400)">Auto ISO (до 6400, как в Weavy)</option>
+              <option value="ISO 100">ISO 100 (Сверхчистая картинка)</option>
+              <option value="ISO 200">ISO 200 (Натуральный динамический диапазон)</option>
+              <option value="ISO 400">ISO 400 (Классическое плёночное зерно)</option>
+              <option value="ISO 800">ISO 800 (Атмосферное кино-зерно)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="exposureFocusFormat">Фокус и формат сохранения (Focus & RAW)</label>
+            <select id="exposureFocusFormat" onchange="updatePrompt()">
+              <option value="AF-C, uncompressed RAW + JPEG output">AF-C, uncompressed RAW + JPEG (как в Weavy)</option>
+              <option value="AF-S single-point precision, uncompressed RAW">AF-S, точечный фокус, RAW</option>
+              <option value="Manual Focus (MF), razor-sharp focal plane, RAW">Manual Focus (Ручной фокус), RAW</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. LIGHTING STUDIO (Схемы света) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>💡</span> Студийное освещение и атмосфера (Lighting)
+            <span class="tag">Light Source</span>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="lightingCategory">Характер света</label>
+            <select id="lightingCategory" onchange="onLightingCategoryChange()">
+              <option value="mood">Кинематографичный / Нуар / Закат (Moody, как в Weavy)</option>
+              <option value="studio">Студийный свет (Editorial Studio)</option>
+              <option value="natural">Естественный свет (Natural Sunlight / Window)</option>
+              <option value="dramatic">Драматичный контраст (Rembrandt & Chiaroscuro)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="lightingSetup">Конкретная световая схема</label>
+            <select id="lightingSetup" onchange="updatePrompt()">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="angleSelect">Ракурс и композиция (Angle)</label>
+            <select id="angleSelect" onchange="updatePrompt()">
+              <option value="medium_long: Medium-long shot capturing model, clothing drape and room atmosphere">medium_long: Средне-общий план с окружением (как в Weavy)</option>
+              <option value="Eye-level, intimate direct perspective with balanced framing">Eye-level (На уровне глаз, прямой честный взгляд)</option>
+              <option value="Low-angle heroic framing capturing authority and stature">Low-angle (Низкий ракурс, монументальность)</option>
+              <option value="Close-up macro detail focusing on tactile surfaces and textures">Close-up Macro (Крупный план, детализация)</option>
+              <option value="Medium shot editorial framing with environmental context">Medium Shot (Поясной редакционный кадр)</option>
+              <option value="High-angle gentle downward view with delicate spatial depth">High-angle (Взгляд сверху вниз)</option>
+              <option value="Dutch angle, slight dynamic compositional tilt">Dutch angle (Динамичный наклон кадра)</option>
+              <option value="Cinematic wide establishing shot showcasing full surroundings">Wide shot (Широкий кинематографичный кадр)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="textureSelect">Текстура и зернистость (Fidelity & Grain)</label>
+            <select id="textureSelect" onchange="updatePrompt()">
+              <option value="Volumetric Atmospheric Texture: subtle volumetric atmospheric texture, faint airborne dust motes caught in light rays, adding depth and live-in realism to the environment">Volumetric Atmospheric Texture: дымка, летающие микро-пылинки в лучах света (как в Weavy)</option>
+              <option value="Ultra-clean medium-format digital fidelity with tactile micro-textures and subtle highlight halation">Medium Format Ultra-Clean + Тактильные микротекстуры</option>
+              <option value="35mm tactile organic film grain with natural emulsion texture and shadow roll-off">35mm Organic Film Grain (Классическое плёночное зерно)</option>
+              <option value="Fine organic Kodak Tri-X silver-halide grain with deep velvet blacks and tactile paper texture">Черно-белое серебряное зерно Tri-X</option>
+              <option value="CineStill characteristic red highlight halation with lush cinematic shadow roll-off">CineStill красное ореольное свечение (Halation)</option>
+              <option value="Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening">Чистый RAW без искусственного перешарпа</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. HUMAN & PRODUCT REALISM TOGGLES -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>👁️</span> Модули микро-реализма (Authentic Realism)
+            <span class="tag">Anti-AI</span>
+          </div>
+        </div>
+
+        <div class="toggle-row" onclick="toggleCheckboxRow('humanEyesToggle', event)">
+          <div class="toggle-text">
+            <span class="toggle-title">Реалистичные живые глаза (Human Eyes Realism)</span>
+            <span class="toggle-sub">Естественные блики роговицы, легкая асимметрия, влажный блеск, отсутствие «стеклянного взгляда»</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="humanEyesToggle" checked onchange="updatePrompt()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row" onclick="toggleCheckboxRow('humanSkinToggle', event)">
+          <div class="toggle-text">
+            <span class="toggle-title">Тактильные поры и микро-текстура кожи (Tactile Micro-Skin)</span>
+            <span class="toggle-sub">Естественный кожный рельеф, пушковые волоски, отсутствие мыльного ретуширования</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="humanSkinToggle" checked onchange="updatePrompt()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row" onclick="toggleCheckboxRow('materialsToggle', event)">
+          <div class="toggle-text">
+            <span class="toggle-title">Физика материалов (Materials & Specular Highlights)</span>
+            <span class="toggle-sub">Точные отражения металлов, стекла, натуральных тканей (шерсть, шелк, кожа)</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="materialsToggle" checked onchange="updatePrompt()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 7. ASPECT RATIO & FORMAT FOR GOOGLE FLOW / MIDJOURNEY -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📐</span> Соотношение сторон (Aspect Ratio)
+            <span class="tag">Output Format</span>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <button class="pill-btn active" data-ar="16:9" onclick="setAspectRatio('16:9')">16:9 <small>Кинематограф</small></button>
+          <button class="pill-btn" data-ar="4:5" onclick="setAspectRatio('4:5')">4:5 <small>Портрет / Instagram</small></button>
+          <button class="pill-btn" data-ar="1:1" onclick="setAspectRatio('1:1')">1:1 <small>Квадрат</small></button>
+          <button class="pill-btn" data-ar="9:16" onclick="setAspectRatio('9:16')">9:16 <small>Reels / Вертикаль</small></button>
+          <button class="pill-btn" data-ar="3:2" onclick="setAspectRatio('3:2')">3:2 <small>Классическое фото 35мм</small></button>
+          <button class="pill-btn" data-ar="21:9" onclick="setAspectRatio('21:9')">21:9 <small>Ультра-широкий анаморф</small></button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Vertical Resizer / Splitter Bar (Draggable) -->
+    <div class="panel-resizer" id="panelResizer" title="Потяните влево или вправо для изменения ширины блоков"></div>
+
+    <!-- Inspector / Output Panel (Right Panel) -->
+    <div class="output-panel" id="outputPanel">
+      
+      <div class="output-header">
+        <h3><span>⚡</span> Финальный Мета-промпт</h3>
+        <span class="stats-badge" id="statsBadge">0 слов | 0 симв.</span>
+      </div>
+
+      <div class="output-body">
+        
+        <div class="breakdown-section">
+          <div class="breakdown-row"><span>Ветка:</span> <b id="breakdownBranch">Portrait (Scratch)</b></div>
+          <div class="breakdown-row"><span>Фотограф:</span> <b id="breakdownPhotographer">Peter Lindbergh</b></div>
+          <div class="breakdown-row"><span>Оптика:</span> <b id="breakdownGear">Canon EOS 5D Mark IV + 85mm f/1.4</b></div>
+          <div class="breakdown-row"><span>Свет:</span> <b id="breakdownLighting">Editorial Studio Softbox</b></div>
+          <div class="breakdown-row"><span>Текстура:</span> <b id="breakdownTexture">Чистый RAW</b></div>
+          <div class="breakdown-row"><span>Микро-реализм:</span> <b id="breakdownRealism">Глаза, Кожа, Материалы</b></div>
+        </div>
+
+        <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-dim); letter-spacing: 0.5px;">
+          Сгенерированный промпт для вставки:
+        </div>
+
+        <div class="prompt-box" id="finalPromptBox">Загрузка генератора...</div>
+
+      </div>
+
+      <div class="output-footer">
+        <button class="copy-btn-main" id="copyBtn" onclick="copyFinalPrompt()">
+          📋 СКОПИРОВАТЬ ДЛЯ GOOGLE FLOW
+        </button>
+
+        <div class="footer-secondary-actions">
+          <button class="btn btn-secondary" onclick="copyPromptClean()">
+            Только промпт (без тегов)
+          </button>
+          <button class="btn btn-secondary" onclick="copyMidjourneyFormat()">
+            С флагом --ar для MJ
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast">✅ Промпт скопирован в буфер обмена!</div>
+
+  <script>
+    // State
+    const state = {
+      mode: 'portrait-scratch',
+      hwTab: 'dslr',
+      aspectRatio: '16:9',
+      subject: '',
+      photographer: 'Peter Lindbergh',
+      customPhotographer: '',
+      includePhotographerMeta: true,
+      humanEyes: true,
+      humanSkin: true,
+      materials: true,
+      camera: '',
+      lens: '',
+      colorGrading: '',
+      filter: '',
+      shutter: '1/125s',
+      aperture: 'f/1.4',
+      iso: 'ISO 100',
+      lightingCategory: 'studio',
+      lightingSetup: '',
+      angle: '',
+      texture: ''
+    };
+
+    // Hardware Presets Database
+    const hardwareDB = {
+      dslr: {
+        cameras: [
+          'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
+          'Canon EOS-1D X Mark III (Flagship 20.1MP Full-Frame)',
+          'Nikon D850 (45.7MP Back-Illuminated Full-Frame)',
+          'Nikon D6 Professional DSLR'
+        ],
+        lenses: [
+          'Canon EF 85mm f/1.4L IS USM (Creamy editorial compression)',
+          'Canon EF 50mm f/1.2L USM (Ultra-shallow depth of field)',
+          'Canon EF 24-70mm f/2.8L II USM (Sharp versatile framing)',
+          'Nikon AF-S NIKKOR 105mm f/1.4E ED (Elite portrait glass)'
+        ],
+        colors: [
+          'Color graded with ARRI Alexa LogC to Rec.709 LUT with subtle highlight roll-off',
+          'Kodak 2383 Motion Picture Print film emulation with deep cinematic blacks',
+          'Neutral commercial color profile with true-to-life skin tones',
+          'Rich moody low-saturation editorial grade with warm shadow tint'
+        ]
+      },
+      mirrorless: {
+        cameras: [
+          'Hasselblad X2D 100C (100MP Medium Format BSI CMOS sensor)',
+          'Sony Alpha 1 (50.1MP Full-Frame Exmor RS)',
+          'Sony A7R V (61MP Full-Frame Exmor R sensor)',
+          'Fujifilm GFX 100 II (102MP Medium Format High-Speed)',
+          'Leica SL2 (47.3MP Full-Frame Maestro III)'
+        ],
+        lenses: [
+          'Hasselblad XCD 55mm f/2.5 V (Medium-format optical perfection)',
+          'Sony FE 50mm f/1.2 GM (Extreme edge-to-edge microcontrast)',
+          'Sony FE 85mm f/1.4 GM II (Flawless bokeh & sharpness)',
+          'Leica Summilux-SL 50mm f/1.4 ASPH (Legendary micro-contrast)'
+        ],
+        colors: [
+          'Hasselblad Natural Colour Solution (HNCS) with unmatched skin rendition',
+          'Leica Cine-Look with muted organic color palette and velvety deep shadows',
+          'Clean 16-bit color gradation with hyper-accurate tonality and zero banding',
+          'Technicolor warm film simulation with subtle sepia warmth in midtones'
+        ]
+      },
+      film_slr: {
+        cameras: [
+          'Pentax 67 II (Legendary 6x7 medium-format film camera)',
+          'Nikon F3 Professional 35mm SLR',
+          'Canon AE-1 Program 35mm SLR',
+          'Leica R8 35mm SLR',
+          'Olympus OM-1 35mm Mechanical SLR'
+        ],
+        lenses: [
+          'SMC Pentax 67 105mm f/2.4 (Iconic cult medium-format bokeh)',
+          'Nikkor 50mm f/1.2 AI-s (Classic vintage optical glow)',
+          'Canon FD 85mm f/1.2L (Vintage high-speed creamy rendering)',
+          'Leica Summicron-R 50mm f/2 (Clean tactile micro-textures)'
+        ],
+        colors: [
+          'Shot on 35mm Kodak Portra 400 with delicate golden warmth and luminous skin tones',
+          'Shot on Kodak Portra 800 with lush saturated highlights and gentle grain',
+          'Shot on Kodak Tri-X 400 black and white film with rich contrast and silver grain',
+          'Shot on Fujifilm Pro 400H with cool pastel tones and subtle greens',
+          'Shot on Ilford HP5 Plus push-processed for dramatic gritty monochrome contrast'
+        ]
+      },
+      film_range: {
+        cameras: [
+          'Contax G2 (Titanium 35mm rangefinder with Zeiss glass)',
+          'Leica M6 (Classic 35mm rangefinder)',
+          'Mamiya 7 II (Legendary 6x7 rangefinder medium format)',
+          'Minolta TC-1 Luxury Compact Film Camera'
+        ],
+        lenses: [
+          'Carl Zeiss Planar T* 45mm f/2 (World-renowned clinical sharpness)',
+          'Carl Zeiss Biogon T* 28mm f/2.8 (Distortion-free architectural clarity)',
+          'Leica Summilux-M 35mm f/1.4 ASPH (The King of documentary photography)',
+          'Mamiya 80mm f/4 L (Hyper-detailed medium-format rendering)'
+        ],
+        colors: [
+          'Loaded with Kodak Vision3 500T (CineStill 800T) with signature red-orange highlight halation glow and deep cool shadow tones',
+          'Shot on Kodak Ektar 100 with ultra-fine grain and hyper-vibrant saturated palette',
+          'Shot on Fujichrome Velvia 50 with deep rich color density and punchy contrast',
+          'Cross-processed slide film with experimental emerald and magenta tint shifts'
+        ]
+      },
+      polaroid: {
+        cameras: [
+          'Polaroid 600 Vintage Instant Camera',
+          'Polaroid SX-70 Folding SLR Instant Camera',
+          'Fujifilm Instax Wide 300 Instant Camera'
+        ],
+        lenses: [
+          'Fixed 116mm f/11 single-element coated glass lens with authentic focal softness',
+          'Polaroid Sonar AutoFocus coated 4-element glass lens with authentic optical flare'
+        ],
+        colors: [
+          'Authentic Polaroid 600 Color instant film chemical aesthetics with characteristic white border framing, soft highlight washing, and tactile vintage emulsion decay',
+          'Polaroid B&W instant film with moody matte blacks and soft milky highlight roll-off',
+          'Fujifilm Instax instant film look with clean daylight balance and instant dye-transfer texture'
+        ]
+      }
+    };
+
+    // Lighting Presets Database
+    const lightingDB = {
+      studio: [
+        'High-end editorial studio lighting: giant 180cm parabolic key softbox with delicate silver bounce reflector fill',
+        'Sculpted 3-point studio lighting with high key octabox, subtle rim hair-light, and black negative fill flags',
+        'Beauty dish lighting with honeycomb grid creating punchy directional contrast and circular iris catchlights',
+        'Clean high-key commercial lighting with bright diffuse illumination and soft gradient shadows'
+      ],
+      natural: [
+        'Golden hour low-sun natural light spilling from behind, casting elongated warm amber shadows and brilliant rim illumination',
+        'Soft directional northern window light with sheer linen curtain diffusion, creating gentle gradations across the subject',
+        'Harsh high-noon direct sunlight with graphic sharp-edged pitch-black shadows and intense specular highlights',
+        'Overcast moody daylight with shadowless milky diffusion and cold serene blue ambient bounce'
+      ],
+      mood: [
+        'Restaurant soft, angled lighting combined with dramatic volumetric atmospheric backlight (полный сетап из Weavy)',
+        'Restaurant soft, angled lighting with delicate ambient falloff (как в Weavy)',
+        'Dramatic volumetric atmospheric light shafts with warm golden highlights and deep shadow contrast (как в Weavy)',
+        'Cinematic volumetric atmospheric haze pierced by warm tungsten practical lamps and cool diffuse fill',
+        'Moody neon illumination with split complementary cyan and amber rim lighting against a deep dark environment',
+        'Single overhead bare tungsten bulb casting steep dramatic shadows and gritty filmic atmosphere',
+        'Soft candlelight and fireplace glow with rich amber warmth and deep intimate falloff'
+      ],
+      dramatic: [
+        'Classic Rembrandt lighting with a distinctive illuminated triangle on the shadowed cheek and deep velvet background falloff',
+        'Extreme Chiaroscuro high-contrast lighting inspired by Caravaggio with deep impenetrable black shadows',
+        'Razor-sharp rim light outlining the silhouette against a completely dark studio backdrop',
+        'Split side lighting (50% direct light, 50% deep shadow) accentuating bone structure and surface textures'
+      ]
+    };
+
+    // System Metaprompt Templates matching the Reference
+    const metaTemplates = {
+      'portrait-scratch': `Generate a photograph from scratch, fully embodying the distinct visual signature and artistic vision of {PHOTOGRAPHER}. Approach this as if {PHOTOGRAPHER} were behind the lens for an exclusive editorial campaign featuring a model. Meticulously design the model's pose, facial expression, wardrobe styling, hair and makeup, lighting setup, environment, and color palette through their unique aesthetic lens. Every element—from the choice of location and atmospheric details to the specific quality of light, shadows, and camera angle—must reflect their authentic approach to fashion storytelling, mood, and visual rhythm. The result must feel like an original, masterfully crafted editorial photograph by {PHOTOGRAPHER}, capturing their exact style and avoiding any generic AI aesthetics.`,
+
+      'portrait-ref': `Treat the attached image only as a loose compositional reference—not as a source to be altered, but as a scene to be reimagined and reshot from scratch by {PHOTOGRAPHER}. Recreate the moment as if {PHOTOGRAPHER} had been present: reinterpret the subject's pose, expression, styling, lighting, environment, color palette, and aesthetic vision through their unique artistic vision. Preserve only the general framing and spatial relationships; everything else should reflect the photographer's authentic approach to storytelling, mood, and visual rhythm. The result must feel like an original photograph by {PHOTOGRAPHER}, not a filtered version of the input.`,
+
+      'product-scratch': `Generate a high-end product photograph from scratch, fully embodying the distinct visual signature and artistic vision of {PHOTOGRAPHER}. Approach this as if {PHOTOGRAPHER} were behind the lens for an exclusive commercial campaign featuring {SUBJECT}. Meticulously design the product presentation, material textures, styling, lighting setup, environment, and color palette through their unique aesthetic lens. Everything—from the choice of props and background to the specific quality of light, shadows, and camera angle—must reflect their authentic approach to product storytelling, atmospheric mood, and visual rhythm. The result must feel like an original, masterfully crafted commercial photograph by {PHOTOGRAPHER}, capturing their exact style and avoiding any generic AI aesthetics.`,
+
+      'product-ref': `Treat the attached image only as a loose compositional reference—not as a source to be altered, but as a product scene to be reimagined and reshot from scratch by {PHOTOGRAPHER}. Recreate the scene as if {PHOTOGRAPHER} had been behind the lens: re-imagine the product's presentation, styling, lighting, environment, and visual atmosphere through their unique artistic vision. Preserve only the essential geometry and spatial relationships; everything else should reflect the photographer's authentic approach to storytelling, mood, and visual rhythm. The result must feel like an original commercial photograph by {PHOTOGRAPHER}, not a filtered version of the input.`
+    };
+
+    // Verbatim text from the original Weavy workflow reference
+    const humanEyesPrompt = "Alive human eyes, emotionally engaged gaze, subtle asymmetry, moist lower eyelids, cinematic catchlights, soft corneal reflections, involuntary micro-expressions, natural raw tension, authentic human presence, zero uncanny valley.";
+    const humanSkinPrompt = "Tactile micro-details rendered with high fidelity: real human skin texture with visible pores on nose, cheeks, and forehead, subtle uneven tone, natural skin oiliness and peach fuzz, no cosmetic airbrush flaws, no retouch look.";
+    const materialsPrompt = "Hyper-tactile material fidelity: pristine sharpness on fabric textures, individual threads, tactile silk sheen, realistic specular micro-reflections on metals and glass.";
+
+    // Init function
+    function init() {
+      try {
+        // Init light/dark theme
+        initTheme();
+
+        // Init draggable panel resizer
+        initResizer();
+
+        // First populate hardware & lighting
+        populateHardwareUI();
+        onLightingCategoryChange();
+
+        // Render preset dropdown list
+        renderPresetVault();
+
+        // Restore saved settings from localStorage (protection against F5 refresh)
+        const restored = loadFromLocalStorage();
+        if (!restored) {
+          const subjectEl = document.getElementById('subjectPrompt');
+          if (subjectEl) subjectEl.value = '';
+          setMode('portrait-scratch');
+        }
+
+        // Trigger update
+        updatePrompt();
+      } catch (err) {
+        console.error('Photo Studio init error:', err);
+        try {
+          // Emergency recovery
+          setMode('portrait-scratch');
+          populateHardwareUI();
+          onLightingCategoryChange();
+          updatePrompt();
+        } catch (e) {}
+      }
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      document.querySelectorAll('.pill-group .pill-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === mode);
+      });
+
+      const subjectInput = document.getElementById('subjectPrompt');
+      const subjectLabel = document.getElementById('subjectLabel');
+      const subjectHint = document.getElementById('subjectHint');
+
+      // All 4 modes now use vanishing placeholders (disappear when user types)
+      if (mode === 'portrait-scratch') {
+        subjectLabel.innerText = 'Описание сцены / Модель / Персонаж';
+        subjectHint.innerText = 'Внешность, поза, одежда, интерьер (подсказка исчезает при вводе)';
+        subjectInput.placeholder = 'Например: Женщина в уютной домашней одежде сидит на краю кровати, мягкий утренний свет из окна...';
+      } else if (mode === 'portrait-ref') {
+        subjectLabel.innerText = 'Сцена и модель по референсу';
+        subjectHint.innerText = 'Что переосмыслить из фото референса (подсказка исчезает при вводе)';
+        subjectInput.placeholder = 'Например: Переосмыслить позу и модель из прикрепленного референса, естественный взгляд, кинематографичный свет...';
+      } else if (mode === 'product-scratch') {
+        subjectLabel.innerText = 'Описание товара / Одежда на модели';
+        subjectHint.innerText = 'Тип одежды/товара, крой, ткань, посадка на модели (подсказка исчезает при вводе)';
+        subjectInput.placeholder = 'Например: Комплект женской домашней одежды (шелковая пижама или халат) на модели, мягкий свет, текстура ткани крупным планом...';
+      } else if (mode === 'product-ref') {
+        subjectLabel.innerText = 'Товар из референса (Домашняя одежда на модели / Предмет)';
+        subjectHint.innerText = 'Опишите товар с референса и окружение (подсказка исчезает при вводе)';
+        subjectInput.placeholder = 'Например: Домашняя одежда с фото-референса на модели, сохранить крой и посадку, светлый уютный интерьер спальни...';
+      }
+
+      updatePrompt();
+    }
+
+    function setAspectRatio(ar) {
+      state.aspectRatio = ar;
+      document.querySelectorAll('[data-ar]').forEach(b => {
+        b.classList.toggle('active', b.dataset.ar === ar);
+      });
+      updatePrompt();
+    }
+
+    function setHardwareTab(tab) {
+      state.hwTab = tab;
+      document.querySelectorAll('.hw-tab-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('onclick').includes(tab));
+      });
+      populateHardwareUI();
+      updatePrompt();
+    }
+
+    function populateHardwareUI() {
+      const db = (state.hwTab && hardwareDB[state.hwTab]) ? hardwareDB[state.hwTab] : hardwareDB.dslr;
+      if (!db) return;
+      const camSelect = document.getElementById('cameraSelect');
+      if (camSelect && db.cameras) camSelect.innerHTML = db.cameras.map(c => `<option value="${c}">${c}</option>`).join('');
+      const lensSelect = document.getElementById('lensSelect');
+      if (lensSelect && db.lenses) lensSelect.innerHTML = db.lenses.map(l => `<option value="${l}">${l}</option>`).join('');
+      const colorSelect = document.getElementById('colorGradingSelect');
+      if (colorSelect && db.colors) colorSelect.innerHTML = db.colors.map(col => `<option value="${col}">${col}</option>`).join('');
+    }
+
+    function onLightingCategoryChange() {
+      const catEl = document.getElementById('lightingCategory');
+      const cat = (catEl && catEl.value && lightingDB[catEl.value]) ? catEl.value : 'mood';
+      state.lightingCategory = cat;
+      const setups = lightingDB[cat] || lightingDB.mood || [];
+      const setupSelect = document.getElementById('lightingSetup');
+      if (setupSelect && setups.length > 0) {
+        setupSelect.innerHTML = setups.map(s => `<option value="${s}">${s}</option>`).join('');
+      }
+      updatePrompt();
+    }
+
+    function onPhotographerSelectChange() {
+      const photoEl = document.getElementById('photographerSelect');
+      const val = photoEl ? photoEl.value : '';
+      const customWrap = document.getElementById('customPhotographerWrap');
+      if (customWrap && customWrap.style) {
+        if (val === 'custom') {
+          customWrap.style.display = 'flex';
+        } else {
+          customWrap.style.display = 'none';
+        }
+      }
+      updatePrompt();
+    }
+
+    function setPresetSubject(text) {
+      document.getElementById('subjectPrompt').value = text;
+      updatePrompt();
+    }
+
+    function toggleCheckboxRow(id, event) {
+      if (event && event.target && (event.target.tagName === 'INPUT' || event.target.classList.contains('slider'))) {
+        return;
+      }
+      const el = document.getElementById(id);
+      if (el) {
+        el.checked = !el.checked;
+        updatePrompt();
+      }
+    }
+
+    function getActivePhotographer() {
+      const selectVal = document.getElementById('photographerSelect').value;
+      if (selectVal === 'custom') {
+        const custom = document.getElementById('customPhotographer').value.trim();
+        return custom || 'Renowned Editorial Photographer';
+      }
+      return selectVal;
+    }
+
+    function updatePrompt() {
+      const rawSubject = document.getElementById('subjectPrompt').value.trim();
+      let subject = rawSubject;
+      if (!subject) {
+        if (state.mode === 'product-ref') {
+          subject = 'Homewear apparel and design from reference image, worn naturally by a model in an authentic, beautifully lit interior with tactile fabric drape';
+        } else if (state.mode === 'product-scratch') {
+          subject = 'Premium commercial loungewear apparel on model with tactile fabric textures and relaxed fit';
+        } else if (state.mode === 'portrait-ref') {
+          subject = 'Reimagined subject from reference image with authentic natural presence and mood';
+        } else {
+          subject = 'Authentic model in natural relaxed pose and lifestyle setting';
+        }
+      }
+      const photographer = getActivePhotographer();
+      const includeMeta = document.getElementById('includePhotographerMeta').checked;
+      
+      const camera = document.getElementById('cameraSelect').value;
+      const lens = document.getElementById('lensSelect').value;
+      const colorGrading = document.getElementById('colorGradingSelect').value;
+      const filter = document.getElementById('filterSelect').value;
+      const shutter = document.getElementById('exposureShutter').value;
+      const aperture = document.getElementById('exposureAperture').value;
+      const iso = document.getElementById('exposureISO').value;
+      
+      const lighting = document.getElementById('lightingSetup').value;
+      const angle = document.getElementById('angleSelect').value;
+      const texture = document.getElementById('textureSelect').value;
+      
+      const humanEyes = document.getElementById('humanEyesToggle').checked;
+      const humanSkin = document.getElementById('humanSkinToggle').checked;
+      const materials = document.getElementById('materialsToggle').checked;
+
+      // Update Breakdown in UI
+      const modeLabels = {
+        'portrait-scratch': 'Portrait (С нуля / Scratch)',
+        'portrait-ref': 'Portrait (По референсу)',
+        'product-scratch': 'Product (С нуля / Scratch)',
+        'product-ref': 'Product (По референсу)'
+      };
+      document.getElementById('breakdownBranch').innerText = modeLabels[state.mode];
+      document.getElementById('breakdownPhotographer').innerText = includeMeta ? `${photographer} (Внедрён)` : 'Выключен (Технический кадр)';
+      document.getElementById('breakdownGear').innerText = `${camera.split('(')[0].trim()} + ${lens.split('(')[0].trim()}`;
+      document.getElementById('breakdownLighting').innerText = lighting.split(':')[0].trim();
+      
+      const texEl = document.getElementById('breakdownTexture');
+      if (texEl) {
+        const texShort = texture.split(':')[0].split('(')[0].trim();
+        texEl.innerText = texShort;
+      }
+      
+      const realismEl = document.getElementById('breakdownRealism');
+      if (realismEl) {
+        let parts = [];
+        if (humanEyes) parts.push('Глаза');
+        if (humanSkin) parts.push('Кожа');
+        if (materials) parts.push('Материалы');
+        realismEl.innerText = parts.length > 0 ? parts.join(' + ') : 'Выключен';
+      }
+
+      // Assemble Parts
+      let promptParts = [];
+
+      // 1. Meta-Instruction (Style Injection)
+      if (includeMeta) {
+        let metaText = metaTemplates[state.mode]
+          .replaceAll('{PHOTOGRAPHER}', photographer)
+          .replaceAll('{SUBJECT}', subject);
+        promptParts.push(`[Photographic Style & Artistic Vision: ${photographer}]\n${metaText}`);
+      }
+
+      // 2. Core Scene / Subject
+      if (state.mode === 'portrait-scratch') {
+        promptParts.push(`Subject & Scene: ${subject}`);
+      } else if (state.mode === 'portrait-ref') {
+        promptParts.push(`Portrait Reference Focus: ${subject}. Reinterpret the subject from the attached reference with authentic lighting and high-fidelity textures.`);
+      } else if (state.mode === 'product-ref') {
+        promptParts.push(`Commercial Product Reference Focus (Apparel on Model): ${subject}. Meticulously preserve the exact clothing cut, pattern, seams, and fit from the reference image, reshot in a high-end lifestyle editorial atmosphere.`);
+      } else {
+        promptParts.push(`Commercial Product Focus: ${subject}`);
+      }
+
+      // 3. Technical Camera Setup (exactly like Weavy Technical Prompt node)
+      const focusFormat = document.getElementById('exposureFocusFormat') ? document.getElementById('exposureFocusFormat').value : 'AF-C, uncompressed RAW + JPEG output';
+      let techItems = [
+        `Camera: ${camera}`,
+        `Lens: ${lens}`,
+        `Color Grading & Stock: ${colorGrading}`,
+        `Exposure Settings: ${shutter}, ${aperture}, ${iso}, ${focusFormat}`
+      ];
+      if (filter && filter !== 'none') {
+        techItems.push(`Lens Optical Filter: ${filter}`);
+      }
+      promptParts.push(`Technical Camera Setup:\n${techItems.join('; ')}.`);
+
+      // 4. Lighting & Environment
+      promptParts.push(`Lighting Setup: ${lighting}. Framing & Angle: ${angle}.`);
+
+      // 5. Texture, Grain & Realism Modifiers (Active for both portrait and product on model)
+      let realismItems = [texture];
+      if (humanEyes) {
+        realismItems.push(humanEyesPrompt);
+      }
+      if (humanSkin) {
+        realismItems.push(humanSkinPrompt);
+      }
+      if (materials) {
+        realismItems.push(materialsPrompt);
+      }
+      promptParts.push(`Image Texture, Materials & Fidelity:\n${realismItems.join(' ')}`);
+
+      // 6. Final Prompt Text
+      const finalPromptText = promptParts.join('\n\n');
+
+      // Display in Box
+      document.getElementById('finalPromptBox').innerText = finalPromptText;
+
+      // Stats
+      const wordCount = finalPromptText.split(/\s+/).filter(Boolean).length;
+      const charCount = finalPromptText.length;
+      document.getElementById('statsBadge').innerText = `${wordCount} слов | ${charCount} симв.`;
+
+      // Auto-save state to localStorage (F5 persistence)
+      saveToLocalStorage();
+    }
+
+    function copyFinalPrompt() {
+      const text = document.getElementById('finalPromptBox').innerText;
+      copyToClipboard(text);
+      
+      const btn = document.getElementById('copyBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '✅ СКОПИРОВАНО В БУФЕР!';
+      btn.classList.add('copied');
+      
+      showToast('Промпт успешно скопирован! Вставляйте в Google Flow.');
+      
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+
+    function copyPromptClean() {
+      // Prompt without header labels
+      const subject = document.getElementById('subjectPrompt').value.trim();
+      const camera = document.getElementById('cameraSelect').value;
+      const lens = document.getElementById('lensSelect').value;
+      const lighting = document.getElementById('lightingSetup').value;
+      const photographer = getActivePhotographer();
+      const includeMeta = document.getElementById('includePhotographerMeta').checked;
+      
+      let cleanPrompt = '';
+      if (includeMeta) {
+        cleanPrompt = `${subject}, photograph by ${photographer}, shot on ${camera}, ${lens}, ${lighting}, high fidelity photography.`;
+      } else {
+        cleanPrompt = `${subject}, shot on ${camera}, ${lens}, ${lighting}, high fidelity photography.`;
+      }
+      copyToClipboard(cleanPrompt);
+      showToast('Лаконичный промпт скопирован!');
+    }
+
+    function copyMidjourneyFormat() {
+      const text = document.getElementById('finalPromptBox').innerText;
+      const mjPrompt = `/imagine prompt: ${text} --ar ${state.aspectRatio} --v 6.1 --style raw`;
+      copyToClipboard(mjPrompt);
+      showToast(`Скопировано с флагом --ar ${state.aspectRatio}!`);
+    }
+
+    function copyToClipboard(str) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(str);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = str;
+        ta.style.position = 'fixed';
+        ta.style.left = '-999999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = `✅ ${msg}`;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function randomizeSettings() {
+      // Randomize photographer
+      const photogs = document.querySelectorAll('#photographerSelect option');
+      const randomPhotog = photogs[Math.floor(Math.random() * (photogs.length - 1))].value;
+      document.getElementById('photographerSelect').value = randomPhotog;
+      onPhotographerSelectChange();
+
+      // Randomize Hardware Tab
+      const tabs = ['dslr', 'mirrorless', 'film_slr', 'film_range'];
+      const randomTab = tabs[Math.floor(Math.random() * tabs.length)];
+      setHardwareTab(randomTab);
+
+      // Randomize Aperture
+      const apertures = ['f/1.2', 'f/1.4', 'f/2.0', 'f/2.8'];
+      document.getElementById('exposureAperture').value = apertures[Math.floor(Math.random() * apertures.length)];
+
+      // Randomize Lighting Category
+      const lightCats = ['studio', 'natural', 'mood', 'dramatic'];
+      const randomLightCat = lightCats[Math.floor(Math.random() * lightCats.length)];
+      document.getElementById('lightingCategory').value = randomLightCat;
+      onLightingCategoryChange();
+
+      showToast('🎲 Настройки случайным образом перемешаны!');
+    }
+
+    function saveToLocalStorage() {
+      try {
+        const data = {
+          mode: state.mode,
+          hwTab: state.hwTab,
+          aspectRatio: state.aspectRatio,
+          subject: document.getElementById('subjectPrompt') ? document.getElementById('subjectPrompt').value : '',
+          photographer: document.getElementById('photographerSelect') ? document.getElementById('photographerSelect').value : '',
+          customPhotographer: document.getElementById('customPhotographer') ? document.getElementById('customPhotographer').value : '',
+          includePhotographerMeta: document.getElementById('includePhotographerMeta') ? document.getElementById('includePhotographerMeta').checked : true,
+          camera: document.getElementById('cameraSelect') ? document.getElementById('cameraSelect').value : '',
+          lens: document.getElementById('lensSelect') ? document.getElementById('lensSelect').value : '',
+          colorGrading: document.getElementById('colorGradingSelect') ? document.getElementById('colorGradingSelect').value : '',
+          filter: document.getElementById('filterSelect') ? document.getElementById('filterSelect').value : '',
+          shutter: document.getElementById('exposureShutter') ? document.getElementById('exposureShutter').value : '',
+          aperture: document.getElementById('exposureAperture') ? document.getElementById('exposureAperture').value : '',
+          iso: document.getElementById('exposureISO') ? document.getElementById('exposureISO').value : '',
+          focusFormat: document.getElementById('exposureFocusFormat') ? document.getElementById('exposureFocusFormat').value : '',
+          lightingCategory: document.getElementById('lightingCategory') ? document.getElementById('lightingCategory').value : '',
+          lightingSetup: document.getElementById('lightingSetup') ? document.getElementById('lightingSetup').value : '',
+          angle: document.getElementById('angleSelect') ? document.getElementById('angleSelect').value : '',
+          texture: document.getElementById('textureSelect') ? document.getElementById('textureSelect').value : '',
+          humanEyes: document.getElementById('humanEyesToggle') ? document.getElementById('humanEyesToggle').checked : true,
+          humanSkin: document.getElementById('humanSkinToggle') ? document.getElementById('humanSkinToggle').checked : true,
+          materials: document.getElementById('materialsToggle') ? document.getElementById('materialsToggle').checked : true
+        };
+        localStorage.setItem('photo_studio_state_v2', JSON.stringify(data));
+      } catch (e) {
+        // Silently catch if localStorage quota exceeded
+      }
+    }
+
+    function loadFromLocalStorage() {
+      try {
+        const raw = localStorage.getItem('photo_studio_state_v2');
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        if (!data) return false;
+
+        if (data.mode) setMode(data.mode);
+        if (data.hwTab) setHardwareTab(data.hwTab);
+        if (data.aspectRatio) setAspectRatio(data.aspectRatio);
+
+        if (data.subject !== undefined && document.getElementById('subjectPrompt')) {
+          document.getElementById('subjectPrompt').value = data.subject;
+        }
+
+        if (data.photographer && document.getElementById('photographerSelect')) {
+          document.getElementById('photographerSelect').value = data.photographer;
+          onPhotographerSelectChange();
+        }
+        if (data.customPhotographer && document.getElementById('customPhotographer')) {
+          document.getElementById('customPhotographer').value = data.customPhotographer;
+        }
+        if (data.includePhotographerMeta !== undefined && document.getElementById('includePhotographerMeta')) {
+          document.getElementById('includePhotographerMeta').checked = data.includePhotographerMeta;
+        }
+
+        if (data.camera && document.getElementById('cameraSelect')) document.getElementById('cameraSelect').value = data.camera;
+        if (data.lens && document.getElementById('lensSelect')) document.getElementById('lensSelect').value = data.lens;
+        if (data.colorGrading && document.getElementById('colorGradingSelect')) document.getElementById('colorGradingSelect').value = data.colorGrading;
+        if (data.filter && document.getElementById('filterSelect')) document.getElementById('filterSelect').value = data.filter;
+        if (data.shutter && document.getElementById('exposureShutter')) document.getElementById('exposureShutter').value = data.shutter;
+        if (data.aperture && document.getElementById('exposureAperture')) document.getElementById('exposureAperture').value = data.aperture;
+        if (data.iso && document.getElementById('exposureISO')) document.getElementById('exposureISO').value = data.iso;
+        if (data.focusFormat && document.getElementById('exposureFocusFormat')) document.getElementById('exposureFocusFormat').value = data.focusFormat;
+
+        if (data.lightingCategory && document.getElementById('lightingCategory')) {
+          document.getElementById('lightingCategory').value = data.lightingCategory;
+          onLightingCategoryChange();
+        }
+        if (data.lightingSetup && document.getElementById('lightingSetup')) document.getElementById('lightingSetup').value = data.lightingSetup;
+        if (data.angle && document.getElementById('angleSelect')) document.getElementById('angleSelect').value = data.angle;
+        if (data.texture && document.getElementById('textureSelect')) document.getElementById('textureSelect').value = data.texture;
+
+        if (data.humanEyes !== undefined && document.getElementById('humanEyesToggle')) document.getElementById('humanEyesToggle').checked = data.humanEyes;
+        if (data.humanSkin !== undefined && document.getElementById('humanSkinToggle')) document.getElementById('humanSkinToggle').checked = data.humanSkin;
+        if (data.materials !== undefined && document.getElementById('materialsToggle')) document.getElementById('materialsToggle').checked = data.materials;
+
+        return true;
+      } catch (e) {
+        console.error('Failed to load saved state', e);
+        return false;
+      }
+    }
+
+    function loadWeavyOriginalPreset() {
+      // 1. Hardware: Contax G2 + Zeiss Planar 45mm f/2 + Kodak Vision3 500T + Hollywood Black Magic 1/8
+      setHardwareTab('film_range');
+      const cam = document.getElementById('cameraSelect');
+      for (let i = 0; i < cam.options.length; i++) {
+        if (cam.options[i].value.includes('Contax G2')) { cam.selectedIndex = i; break; }
+      }
+      const lens = document.getElementById('lensSelect');
+      for (let i = 0; i < lens.options.length; i++) {
+        if (lens.options[i].value.includes('Planar T* 45mm')) { lens.selectedIndex = i; break; }
+      }
+      const col = document.getElementById('colorGradingSelect');
+      for (let i = 0; i < col.options.length; i++) {
+        if (col.options[i].value.includes('Vision3 500T')) { col.selectedIndex = i; break; }
+      }
+      const fil = document.getElementById('filterSelect');
+      for (let i = 0; i < fil.options.length; i++) {
+        if (fil.options[i].value.includes('Hollywood Black Magic')) { fil.selectedIndex = i; break; }
+      }
+
+      // 2. Exposure: 1/125s, f/2.0, Auto ISO (up to 6400), AF-C
+      document.getElementById('exposureShutter').value = '1/125s';
+      document.getElementById('exposureAperture').value = 'f/2.0';
+      document.getElementById('exposureISO').value = 'Auto ISO (up to 6400)';
+      if (document.getElementById('exposureFocusFormat')) {
+        document.getElementById('exposureFocusFormat').value = 'AF-C, uncompressed RAW + JPEG output';
+      }
+
+      // 3. Lighting: Moody / Restaurant Soft + Volumetric Backlight
+      document.getElementById('lightingCategory').value = 'mood';
+      onLightingCategoryChange();
+      const light = document.getElementById('lightingSetup');
+      for (let i = 0; i < light.options.length; i++) {
+        if (light.options[i].value.includes('Restaurant soft') || light.options[i].value.includes('Weavy')) {
+          light.selectedIndex = i; break;
+        }
+      }
+
+      // 4. Angle & Texture: medium_long + Volumetric Atmospheric Texture
+      const ang = document.getElementById('angleSelect');
+      for (let i = 0; i < ang.options.length; i++) {
+        if (ang.options[i].value.includes('medium_long')) { ang.selectedIndex = i; break; }
+      }
+      const tex = document.getElementById('textureSelect');
+      for (let i = 0; i < tex.options.length; i++) {
+        if (tex.options[i].value.includes('Volumetric Atmospheric')) { tex.selectedIndex = i; break; }
+      }
+
+      // 5. Format 4:5
+      setAspectRatio('4:5');
+
+      // 6. Realism
+      document.getElementById('humanEyesToggle').checked = true;
+      document.getElementById('humanSkinToggle').checked = true;
+      document.getElementById('materialsToggle').checked = true;
+
+      updatePrompt();
+      showToast('⭐ Оригинальный сетап Weavy (Contax G2 + Vision3 500T + f/2.0) активирован!');
+    }
+
+    // Curated Default Studio Presets (11 Presets)
+    const defaultStudioPresets = [
+      {
+        id: 'preset_model_clothing',
+        name: '1. Одежда на модели',
+        data: {
+          mode: 'product-scratch',
+          hwTab: 'dslr',
+          camera: 'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
+          lens: 'Canon EF 85mm f/1.4L IS USM (Creamy editorial compression)',
+          shutter: '1/160s',
+          aperture: 'f/8.0',
+          iso: 'ISO 100',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          colorGrading: 'Neutral commercial color profile with true-to-life skin tones',
+          filter: 'none',
+          lightingCategory: 'studio',
+          lightingSetup: 'High-end editorial studio lighting: giant 180cm parabolic key softbox with delicate silver bounce reflector fill',
+          angle: 'Eye-level, intimate direct perspective with balanced framing',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Укажите полный рост, если нужно показать изделие целиком.'
+        }
+      },
+      {
+        id: 'preset_product_white_bg',
+        name: '2. Товар на белом фоне',
+        data: {
+          mode: 'product-scratch',
+          hwTab: 'dslr',
+          camera: 'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
+          lens: 'Canon EF 24-70mm f/2.8L II USM (Sharp versatile framing)',
+          shutter: '1/125s',
+          aperture: 'f/8.0',
+          iso: 'ISO 100',
+          focusFormat: 'AF-S single-point precision, uncompressed RAW',
+          colorGrading: 'Neutral commercial color profile with true-to-life skin tones',
+          filter: 'none',
+          lightingCategory: 'studio',
+          lightingSetup: 'Clean high-key commercial lighting with bright diffuse illumination and soft gradient shadows',
+          angle: 'Eye-level, intimate direct perspective with balanced framing',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: false,
+          humanSkin: false,
+          materials: true,
+          aspectRatio: '1:1',
+          prompt: 'Белый бесшовный фон, мягкая контактная тень, сохранённые контуры товара'
+        }
+      },
+      {
+        id: 'preset_flat_lay',
+        name: '3. Flat lay',
+        data: {
+          mode: 'product-scratch',
+          hwTab: 'dslr',
+          camera: 'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
+          lens: 'Canon EF 50mm f/1.2L USM (Ultra-shallow depth of field)',
+          shutter: '1/125s',
+          aperture: 'f/8.0',
+          iso: 'ISO 100',
+          focusFormat: 'AF-S single-point precision, uncompressed RAW',
+          colorGrading: 'Neutral commercial color profile with true-to-life skin tones',
+          filter: 'none',
+          lightingCategory: 'studio',
+          lightingSetup: 'High-end editorial studio lighting: giant 180cm parabolic key softbox with delicate silver bounce reflector fill',
+          angle: 'High-angle gentle downward view with delicate spatial depth',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: false,
+          humanSkin: false,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Flat lay, камера строго сверху под углом 90°, плоскость камеры параллельна поверхности, без перспективного наклона'
+        }
+      },
+      {
+        id: 'preset_fabric_macro',
+        name: '4. Детали ткани и швов',
+        data: {
+          mode: 'product-scratch',
+          hwTab: 'dslr',
+          camera: 'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
+          lens: 'Canon EF 24-70mm f/2.8L II USM (Sharp versatile framing)',
+          shutter: '1/125s',
+          aperture: 'f/8.0',
+          iso: 'ISO 100',
+          focusFormat: 'Manual Focus (MF), razor-sharp focal plane, RAW',
+          colorGrading: 'Neutral commercial color profile with true-to-life skin tones',
+          filter: 'none',
+          lightingCategory: 'studio',
+          lightingSetup: 'High-end editorial studio lighting: giant 180cm parabolic key softbox with delicate silver bounce reflector fill',
+          angle: 'Close-up macro detail focusing on tactile surfaces and textures',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: false,
+          humanSkin: false,
+          materials: true,
+          aspectRatio: '1:1',
+          prompt: 'Боковой скользящий свет подчёркивает переплетение нитей и строчку'
+        }
+      },
+      {
+        id: 'preset_black_clothing',
+        name: '5. Чёрная одежда — читаемые складки и силуэт',
+        data: {
+          mode: 'product-scratch',
+          hwTab: 'dslr',
+          camera: 'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
+          lens: 'Canon EF 85mm f/1.4L IS USM (Creamy editorial compression)',
+          shutter: '1/160s',
+          aperture: 'f/8.0',
+          iso: 'ISO 100',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          colorGrading: 'Neutral commercial color profile with true-to-life skin tones',
+          filter: 'none',
+          lightingCategory: 'studio',
+          lightingSetup: 'Sculpted 3-point studio lighting with high key octabox, subtle rim hair-light, and black negative fill flags',
+          angle: 'Eye-level, intimate direct perspective with balanced framing',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Чёрная ткань остаётся чёрной, детали в тенях сохранены, складки читаются, нейтральный серый фон'
+        }
+      },
+      {
+        id: 'preset_white_clothing',
+        name: '6. Белая одежда — фактура без пересветов',
+        data: {
+          mode: 'product-scratch',
+          hwTab: 'dslr',
+          camera: 'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
+          lens: 'Canon EF 85mm f/1.4L IS USM (Creamy editorial compression)',
+          shutter: '1/160s',
+          aperture: 'f/8.0',
+          iso: 'ISO 100',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          colorGrading: 'Neutral commercial color profile with true-to-life skin tones',
+          filter: 'none',
+          lightingCategory: 'studio',
+          lightingSetup: 'High-end editorial studio lighting: giant 180cm parabolic key softbox with delicate silver bounce reflector fill',
+          angle: 'Eye-level, intimate direct perspective with balanced framing',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Светло-серый фон, белая ткань с видимыми швами и фактурой, мягкие тени в складках, без выбитых светов'
+        }
+      },
+      {
+        id: 'preset_silk_satin',
+        name: '7. Шёлк и атлас — мягкие контролируемые блики',
+        data: {
+          mode: 'product-scratch',
+          hwTab: 'mirrorless',
+          camera: 'Hasselblad X2D 100C (100MP Medium Format BSI CMOS sensor)',
+          lens: 'Hasselblad XCD 55mm f/2.5 V (Medium-format optical perfection)',
+          shutter: '1/125s',
+          aperture: 'f/5.6',
+          iso: 'ISO 100',
+          focusFormat: 'AF-S single-point precision, uncompressed RAW',
+          colorGrading: 'Hasselblad Natural Colour Solution (HNCS) with unmatched skin rendition',
+          filter: 'none',
+          lightingCategory: 'studio',
+          lightingSetup: 'High-end editorial studio lighting: giant 180cm parabolic key softbox with delicate silver bounce reflector fill',
+          angle: 'medium_long: Medium-long shot capturing model, clothing drape and room atmosphere',
+          texture: 'Ultra-clean medium-format digital fidelity with tactile micro-textures and subtle highlight halation',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Широкие плавные блики раскрывают драпировку шёлка, без жёстких белых пятен'
+        }
+      },
+      {
+        id: 'preset_knitwear_wool',
+        name: '8. Трикотаж и шерсть — объёмная фактура',
+        data: {
+          mode: 'product-scratch',
+          hwTab: 'mirrorless',
+          camera: 'Sony A7R V (61MP Full-Frame Exmor R sensor)',
+          lens: 'Sony FE 85mm f/1.4 GM II (Flawless bokeh & sharpness)',
+          shutter: '1/160s',
+          aperture: 'f/5.6',
+          iso: 'ISO 400',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          colorGrading: 'Clean 16-bit color gradation with hyper-accurate tonality and zero banding',
+          filter: 'none',
+          lightingCategory: 'natural',
+          lightingSetup: 'Soft directional northern window light with sheer linen curtain diffusion, creating gentle gradations across the subject',
+          angle: 'Medium shot editorial framing with environmental context',
+          texture: 'Ultra-clean medium-format digital fidelity with tactile micro-textures and subtle highlight halation',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Окно сбоку, мягкие тени между петлями, видимые волокна шерсти'
+        }
+      },
+      {
+        id: 'preset_clothing_motion',
+        name: '9. Одежда в движении — шаг и разворот',
+        data: {
+          mode: 'product-scratch',
+          hwTab: 'mirrorless',
+          camera: 'Sony Alpha 1 (50.1MP Full-Frame Exmor RS)',
+          lens: 'Sony FE 85mm f/1.4 GM II (Flawless bokeh & sharpness)',
+          shutter: '1/500s',
+          aperture: 'f/5.6',
+          iso: 'ISO 400',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          colorGrading: 'Clean 16-bit color gradation with hyper-accurate tonality and zero banding',
+          filter: 'none',
+          lightingCategory: 'natural',
+          lightingSetup: 'Overcast moody daylight with shadowless milky diffusion and cold serene blue ambient bounce',
+          angle: 'medium_long: Medium-long shot capturing model, clothing drape and room atmosphere',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Модель делает шаг или плавный разворот, движение ткани зафиксировано, лицо и одежда резкие'
+        }
+      },
+      {
+        id: 'preset_bags_accessories',
+        name: '10. Сумки и аксессуары — форма и фурнитура',
+        data: {
+          mode: 'product-scratch',
+          hwTab: 'dslr',
+          camera: 'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
+          lens: 'Canon EF 24-70mm f/2.8L II USM (Sharp versatile framing)',
+          shutter: '1/125s',
+          aperture: 'f/8.0',
+          iso: 'ISO 100',
+          focusFormat: 'AF-S single-point precision, uncompressed RAW',
+          colorGrading: 'Neutral commercial color profile with true-to-life skin tones',
+          filter: 'none',
+          lightingCategory: 'studio',
+          lightingSetup: 'High-end editorial studio lighting: giant 180cm parabolic key softbox with delicate silver bounce reflector fill',
+          angle: 'High-angle gentle downward view with delicate spatial depth',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: false,
+          humanSkin: false,
+          materials: true,
+          aspectRatio: '1:1',
+          prompt: 'Товар развёрнут на три четверти, камера немного выше предмета, видны передняя и боковая поверхности, фактура кожи и аккуратные блики на фурнитуре'
+        }
+      },
+      {
+        id: 'preset_luxury_handbag',
+        name: 'Luxury Handbag — премиальная карточка сумки',
+        data: {
+          mode: 'product-scratch',
+          hwTab: 'dslr',
+          camera: 'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
+          lens: 'Canon EF 85mm f/1.4L IS USM (Creamy editorial compression)',
+          shutter: '1/125s',
+          aperture: 'f/8.0',
+          iso: 'ISO 100',
+          focusFormat: 'AF-S single-point precision, uncompressed RAW',
+          colorGrading: 'Neutral commercial color profile with true-to-life skin tones',
+          filter: 'none',
+          lightingCategory: 'studio',
+          lightingSetup: 'High-end editorial studio lighting: giant 180cm parabolic key softbox with delicate silver bounce reflector fill',
+          angle: 'Eye-level, intimate direct perspective with balanced framing',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          humanEyes: false,
+          humanSkin: false,
+          materials: true,
+          aspectRatio: '4:5',
+          prompt: 'Премиальная каталожная фотография сумки [цвет, материал, форма, размер и особенности фурнитуры]. Только сумка, без модели и рук. Сумка стоит на матовой светло-серой бесшовной поверхности, повёрнута на три четверти: хорошо видны передняя панель и боковая глубина. Камера расположена на уровне середины изделия, вертикальные линии ровные, пропорции естественные. Ручки аккуратно расположены, ремень не перекрывает сумку и фурнитуру. Большой мягкий источник света спереди и сбоку под углом около 45°, деликатное заполнение с противоположной стороны. Свет раскрывает фактуру кожи, швы и тиснение; на металле — контролируемые светлые отражения без пересветов. Вся сумка резкая, от передней застёжки до задней ручки. Точный цвет материала, мягкая контактная тень, свободное пространство вокруг изделия. Без реквизита, декоративных надписей и добавленных логотипов.'
+        }
+      },
+      {
+        id: 'preset_weavy',
+        name: '⭐ Weavy Cult Film (Contax G2 & CineStill)',
+        data: {
+          mode: 'product-ref',
+          hwTab: 'film_range',
+          camera: 'Contax G2 (Titanium 35mm rangefinder with Zeiss glass)',
+          lens: 'Carl Zeiss Planar T* 45mm f/2 (World-renowned clinical sharpness)',
+          colorGrading: 'Loaded with Kodak Vision3 500T (CineStill 800T) with signature red-orange highlight halation glow and deep cool shadow tones',
+          filter: 'Hollywood Black Magic 1/8 diffusion filter',
+          shutter: '1/125s',
+          aperture: 'f/2.0',
+          iso: 'Auto ISO (up to 6400)',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          lightingCategory: 'mood',
+          lightingSetup: 'Restaurant soft, angled lighting combined with dramatic volumetric atmospheric backlight (полный сетап из Weavy)',
+          angle: 'medium_long: Medium-long shot capturing model, clothing drape and room atmosphere',
+          texture: 'Volumetric Atmospheric Texture: subtle volumetric atmospheric texture, faint airborne dust motes caught in light rays, adding depth and live-in realism to the environment',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: true,
+          aspectRatio: '4:5',
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          prompt: 'Белый кот сидит на капоте винтажного автомобиля Porsche 911 в лучах заходящего солнца, мокрая после дождя брусчатка'
+        }
+      },
+      {
+        id: 'preset_nordic_homewear',
+        name: '🛌 Nordic Morning Homewear (Hasselblad)',
+        data: {
+          mode: 'product-ref',
+          hwTab: 'mirrorless',
+          camera: 'Hasselblad X2D 100C (100MP Medium Format BSI CMOS sensor)',
+          lens: 'Hasselblad XCD 55mm f/2.5 V (Medium-format optical perfection)',
+          colorGrading: 'Hasselblad Natural Colour Solution (HNCS) with unmatched skin rendition',
+          filter: 'Tiffen Black Pro-Mist 1/8 subtle diffusion filter',
+          shutter: '1/160s',
+          aperture: 'f/2.8',
+          iso: 'ISO 100',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          lightingCategory: 'natural',
+          lightingSetup: 'Soft directional northern window light with sheer linen curtain diffusion, creating gentle gradations across the subject',
+          angle: 'Eye-level, intimate direct perspective with balanced framing',
+          texture: 'Ultra-clean medium-format digital fidelity with tactile micro-textures and subtle highlight halation',
+          photographer: 'Peter Lindbergh',
+          includePhotographerMeta: false,
+          aspectRatio: '4:5',
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          prompt: 'Комплект женской домашней одежды из органического хлопка на модели, мягкий рассеянный утренний свет из окна, уютная скандинавская спальня'
+        }
+      },
+      {
+        id: 'preset_silk_vogue',
+        name: '✨ Silk & Velvet Vogue Editorial (Paolo Roversi)',
+        data: {
+          mode: 'portrait-scratch',
+          hwTab: 'mirrorless',
+          camera: 'Leica SL2 (47.3MP Full-Frame Maestro III)',
+          lens: 'Leica Summilux-SL 50mm f/1.4 ASPH (Legendary micro-contrast)',
+          colorGrading: 'Leica Cine-Look with muted organic color palette and velvety deep shadows',
+          filter: 'Hollywood Black Magic 1/8 diffusion filter',
+          shutter: '1/125s',
+          aperture: 'f/1.4',
+          iso: 'ISO 200',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          lightingCategory: 'dramatic',
+          lightingSetup: 'Classic Rembrandt lighting with a distinctive illuminated triangle on the shadowed cheek and deep velvet background falloff',
+          angle: 'Close-up macro detail focusing on tactile surfaces and textures',
+          texture: 'Volumetric Atmospheric Texture: subtle volumetric atmospheric texture, faint airborne dust motes caught in light rays, adding depth and live-in realism to the environment',
+          photographer: 'Paolo Roversi',
+          includePhotographerMeta: true,
+          aspectRatio: '4:5',
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          prompt: 'Шелковое платье-комбинация глубокого изумрудного оттенка на модели, бархатная драпировка, поэтичный живописный свет'
+        }
+      },
+      {
+        id: 'preset_clean_commercial',
+        name: '🏷️ Clean Commercial E-Commerce (Zara & Apple)',
+        data: {
+          mode: 'product-ref',
+          hwTab: 'dslr',
+          camera: 'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
+          lens: 'Canon EF 50mm f/1.2L USM (Ultra-shallow depth of field)',
+          colorGrading: 'Neutral commercial color profile with true-to-life skin tones',
+          filter: 'none',
+          shutter: '1/160s',
+          aperture: 'f/5.6',
+          iso: 'ISO 100',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          lightingCategory: 'studio',
+          lightingSetup: 'High-end editorial studio lighting: giant 180cm parabolic key softbox with delicate silver bounce reflector fill',
+          angle: 'Medium shot editorial framing with environmental context',
+          texture: 'Pristine uncompressed RAW fidelity, razor-sharp edge definition without artificial digital oversharpening',
+          photographer: 'Steven Meisel',
+          includePhotographerMeta: false,
+          aspectRatio: '3:2',
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          prompt: 'Минималистичная каталожная съемка базовой одежды на нейтральном сером фоне, кристальная резкость и точная цветопередача'
+        }
+      },
+      {
+        id: 'preset_golden_lifestyle',
+        name: '☕ Warm Golden Hour Cozy Home (Portra 400)',
+        data: {
+          mode: 'product-ref',
+          hwTab: 'film_slr',
+          camera: 'Pentax 67 II (Legendary 6x7 medium-format film camera)',
+          lens: 'SMC Pentax 67 105mm f/2.4 (Iconic cult medium-format bokeh)',
+          colorGrading: 'Shot on 35mm Kodak Portra 400 with delicate golden warmth and luminous skin tones',
+          filter: 'Tiffen Black Pro-Mist 1/4 filter applied for ultra-subtle highlight bloom and luxurious optical softness',
+          shutter: '1/125s',
+          aperture: 'f/2.4',
+          iso: 'ISO 400',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          lightingCategory: 'natural',
+          lightingSetup: 'Golden hour low-sun natural light spilling from behind, casting elongated warm amber shadows and brilliant rim illumination',
+          angle: 'medium_long: Medium-long shot capturing model, clothing drape and room atmosphere',
+          texture: '35mm tactile organic film grain with natural emulsion texture and shadow roll-off',
+          photographer: 'Annie Leibovitz',
+          includePhotographerMeta: true,
+          aspectRatio: '4:5',
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          prompt: 'Уютный вязаный кардиган крупной вязки на модели с чашкой кофе у залитого теплым закатным солнцем окна'
+        }
+      }
+    ];
+
+    function getPresetsList() {
+      try {
+        const raw = localStorage.getItem('studio_vault_presets_v4');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+      return defaultStudioPresets;
+    }
+
+    function savePresetsList(list) {
+      try {
+        localStorage.setItem('studio_vault_presets_v4', JSON.stringify(list));
+      } catch (e) {}
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderPresetVault() {
+      const presets = getPresetsList();
+      const listEl = document.getElementById('presetDropdownList');
+      if (!listEl) return;
+
+      listEl.innerHTML = presets.map((p) => {
+        const camShort = p.data.camera ? p.data.camera.split('(')[0].trim() : 'Camera';
+        const lensShort = p.data.lens ? p.data.lens.split('(')[0].trim() : 'Lens';
+        const lightShort = p.data.lightingCategory || 'Light';
+        const texShort = p.data.texture ? p.data.texture.split(':')[0].split('(')[0].trim() : '';
+        const texTag = texShort ? `<span class="preset-item-tag">🎞️ ${texShort}</span>` : '';
+        const promptSnippet = p.data.prompt ? `<div class="preset-item-prompt-snippet" title="${escapeHtml(p.data.prompt)}">💬 ${escapeHtml(p.data.prompt)}</div>` : '';
+        return `
+          <div class="preset-item" onclick="applyVaultPreset('${p.id}')" title="Кликните для применения сетапа">
+            <div class="preset-item-top">
+              <span class="preset-item-title" id="title_${p.id}">
+                ${p.name}
+              </span>
+              <div class="preset-item-tools" onclick="event.stopPropagation()">
+                <button class="preset-item-tool-btn" onclick="startEditPresetTitle('${p.id}')" title="Переименовать сетап">✏️</button>
+                <button class="preset-item-tool-btn" onclick="updateVaultPresetWithCurrent('${p.id}')" title="Сохранить текущие настройки в этот сетап">💾</button>
+                <button class="preset-item-tool-btn danger" onclick="deleteVaultPreset('${p.id}')" title="Удалить сетап">✕</button>
+              </div>
+            </div>
+            
+            <div class="preset-item-desc">
+              <span class="preset-item-tag">📷 ${camShort}</span>
+              <span class="preset-item-tag">🔍 ${lensShort}</span>
+              <span class="preset-item-tag">💡 ${lightShort}</span>
+              <span class="preset-item-tag">⚙️ ${p.data.aperture || 'f/8.0'}</span>
+              <span class="preset-item-tag">📐 ${p.data.aspectRatio || '4:5'}</span>
+              ${texTag}
+            </div>
+            ${promptSnippet}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setSelectFuzzy(selectId, targetVal) {
+      const el = document.getElementById(selectId);
+      if (!el || !targetVal) return;
+      
+      // 1. Exact match
+      for (let i = 0; i < el.options.length; i++) {
+        if (el.options[i].value === targetVal) {
+          el.selectedIndex = i;
+          return;
+        }
+      }
+      
+      // 2. Substring match
+      const cleanTarget = targetVal.toLowerCase().trim();
+      for (let i = 0; i < el.options.length; i++) {
+        const optVal = (el.options[i].value || '').toLowerCase();
+        const optText = (el.options[i].text || '').toLowerCase();
+        if (optVal.includes(cleanTarget) || cleanTarget.includes(optVal) ||
+            optText.includes(cleanTarget) || cleanTarget.includes(optText)) {
+          el.selectedIndex = i;
+          return;
+        }
+      }
+
+      // 3. Match prefix
+      const prefix = cleanTarget.slice(0, 15);
+      for (let i = 0; i < el.options.length; i++) {
+        const optVal = (el.options[i].value || '').toLowerCase();
+        if (optVal.includes(prefix)) {
+          el.selectedIndex = i;
+          return;
+        }
+      }
+    }
+
+    function applyVaultPreset(id) {
+      const presets = getPresetsList();
+      const preset = presets.find(p => p.id === id);
+      if (!preset) return;
+
+      const d = preset.data;
+      if (d.mode) setMode(d.mode);
+      if (d.hwTab) setHardwareTab(d.hwTab);
+      if (d.aspectRatio) setAspectRatio(d.aspectRatio);
+
+      setSelectFuzzy('cameraSelect', d.camera);
+      setSelectFuzzy('lensSelect', d.lens);
+      setSelectFuzzy('colorGradingSelect', d.colorGrading);
+      setSelectFuzzy('filterSelect', d.filter);
+
+      if (d.shutter) document.getElementById('exposureShutter').value = d.shutter;
+      if (d.aperture) document.getElementById('exposureAperture').value = d.aperture;
+      if (d.iso) document.getElementById('exposureISO').value = d.iso;
+      if (d.focusFormat && document.getElementById('exposureFocusFormat')) {
+        document.getElementById('exposureFocusFormat').value = d.focusFormat;
+      }
+
+      if (d.lightingCategory) {
+        document.getElementById('lightingCategory').value = d.lightingCategory;
+        onLightingCategoryChange();
+      }
+      setSelectFuzzy('lightingSetup', d.lightingSetup);
+      setSelectFuzzy('angleSelect', d.angle);
+      setSelectFuzzy('textureSelect', d.texture);
+
+      if (d.photographer) {
+        setSelectFuzzy('photographerSelect', d.photographer);
+        onPhotographerSelectChange();
+      }
+      if (d.includePhotographerMeta !== undefined) {
+        document.getElementById('includePhotographerMeta').checked = d.includePhotographerMeta;
+      }
+
+      if (d.humanEyes !== undefined) document.getElementById('humanEyesToggle').checked = d.humanEyes;
+      if (d.humanSkin !== undefined) document.getElementById('humanSkinToggle').checked = d.humanSkin;
+      if (d.materials !== undefined) document.getElementById('materialsToggle').checked = d.materials;
+
+      // Set editable, non-vanishing prompt hint in the subject prompt field
+      if (d.prompt !== undefined) {
+        document.getElementById('subjectPrompt').value = d.prompt;
+      }
+
+      updatePrompt();
+      showToast(`⭐ Сетап «${preset.name}» применён!`);
+    }
+
+    function updateVaultPresetWithCurrent(id) {
+      const presets = getPresetsList();
+      const preset = presets.find(p => p.id === id);
+      if (!preset) return;
+
+      preset.data = {
+        mode: state.mode,
+        hwTab: state.hwTab,
+        aspectRatio: state.aspectRatio,
+        prompt: document.getElementById('subjectPrompt').value,
+        camera: document.getElementById('cameraSelect').value,
+        lens: document.getElementById('lensSelect').value,
+        colorGrading: document.getElementById('colorGradingSelect').value,
+        filter: document.getElementById('filterSelect').value,
+        shutter: document.getElementById('exposureShutter').value,
+        aperture: document.getElementById('exposureAperture').value,
+        iso: document.getElementById('exposureISO').value,
+        focusFormat: document.getElementById('exposureFocusFormat') ? document.getElementById('exposureFocusFormat').value : 'AF-C, uncompressed RAW + JPEG output',
+        lightingCategory: document.getElementById('lightingCategory').value,
+        lightingSetup: document.getElementById('lightingSetup').value,
+        angle: document.getElementById('angleSelect').value,
+        texture: document.getElementById('textureSelect').value,
+        photographer: document.getElementById('photographerSelect').value,
+        includePhotographerMeta: document.getElementById('includePhotographerMeta').checked,
+        humanEyes: document.getElementById('humanEyesToggle').checked,
+        humanSkin: document.getElementById('humanSkinToggle').checked,
+        materials: document.getElementById('materialsToggle').checked
+      };
+
+      savePresetsList(presets);
+      renderPresetVault();
+      showToast(`💾 Сетап «${preset.name}» обновлён текущими настройками!`);
+    }
+
+    function startEditPresetTitle(id) {
+      const titleSpan = document.getElementById(`title_${id}`);
+      if (!titleSpan) return;
+      const presets = getPresetsList();
+      const preset = presets.find(p => p.id === id);
+      if (!preset) return;
+
+      const currentText = preset.name;
+      titleSpan.innerHTML = `
+        <input type="text" class="vault-title-edit-input" id="input_${id}" value="${currentText}" 
+          onblur="finishEditPresetTitle('${id}')" 
+          onkeydown="if(event.key === 'Enter') finishEditPresetTitle('${id}')">
+      `;
+      const input = document.getElementById(`input_${id}`);
+      input.focus();
+      input.select();
+    }
+
+    function finishEditPresetTitle(id) {
+      const input = document.getElementById(`input_${id}`);
+      if (!input) return;
+      const newName = input.value.trim();
+      if (newName) {
+        const presets = getPresetsList();
+        const preset = presets.find(p => p.id === id);
+        if (preset) {
+          preset.name = newName;
+          savePresetsList(presets);
+        }
+      }
+      renderPresetVault();
+    }
+
+    function createNewPresetFromCurrent() {
+      const name = prompt('Введите название для нового сетапа:', 'Мой фото-сетап');
+      if (!name || !name.trim()) return;
+
+      const presets = getPresetsList();
+      const newId = 'preset_' + Date.now();
+      const newPreset = {
+        id: newId,
+        name: name.trim(),
+        data: {
+          mode: state.mode,
+          hwTab: state.hwTab,
+          aspectRatio: state.aspectRatio,
+          prompt: document.getElementById('subjectPrompt').value,
+          camera: document.getElementById('cameraSelect').value,
+          lens: document.getElementById('lensSelect').value,
+          colorGrading: document.getElementById('colorGradingSelect').value,
+          filter: document.getElementById('filterSelect').value,
+          shutter: document.getElementById('exposureShutter').value,
+          aperture: document.getElementById('exposureAperture').value,
+          iso: document.getElementById('exposureISO').value,
+          focusFormat: document.getElementById('exposureFocusFormat') ? document.getElementById('exposureFocusFormat').value : 'AF-C, uncompressed RAW + JPEG output',
+          lightingCategory: document.getElementById('lightingCategory').value,
+          lightingSetup: document.getElementById('lightingSetup').value,
+          angle: document.getElementById('angleSelect').value,
+          texture: document.getElementById('textureSelect').value,
+          photographer: document.getElementById('photographerSelect').value,
+          includePhotographerMeta: document.getElementById('includePhotographerMeta').checked,
+          humanEyes: document.getElementById('humanEyesToggle').checked,
+          humanSkin: document.getElementById('humanSkinToggle').checked,
+          materials: document.getElementById('materialsToggle').checked
+        }
+      };
+
+      presets.unshift(newPreset);
+      savePresetsList(presets);
+      renderPresetVault();
+      showToast(`🎉 Сетап «${name}» сохранен в Preset Vault!`);
+    }
+
+    function deleteVaultPreset(id) {
+      let presets = getPresetsList();
+      if (presets.length <= 1) {
+        showToast('⚠️ Нельзя удалить последний сетап.');
+        return;
+      }
+      const preset = presets.find(p => p.id === id);
+      if (!confirm(`Удалить сетап «${preset ? preset.name : id}»?`)) return;
+
+      presets = presets.filter(p => p.id !== id);
+      savePresetsList(presets);
+      renderPresetVault();
+      showToast('🗑️ Сетап удалён.');
+    }
+
+    function resetPresetsToDefault() {
+      if (!confirm('Сбросить панель сетапов к исходным 16 сетапам? Все ваши изменения в сетапах будут сброшены.')) return;
+      localStorage.removeItem('studio_vault_presets_v4');
+      localStorage.removeItem('studio_vault_presets_v3');
+      localStorage.removeItem('studio_vault_presets_v2');
+      renderPresetVault();
+      showToast('↺ Сетапы сброшены к 16 оригинальным.');
+    }
+
+    // Theme logic (Light / Dark)
+    function initTheme() {
+      try {
+        const savedTheme = localStorage.getItem('studio_theme');
+        const icon = document.getElementById('themeIcon');
+        const btn = document.getElementById('themeToggleBtn');
+        if (savedTheme === 'light') {
+          document.body.classList.add('light-theme');
+          if (icon) icon.innerText = '☀️';
+          if (btn) btn.title = 'Светлая тема (нажмите для включения тёмной)';
+        } else {
+          document.body.classList.remove('light-theme');
+          if (icon) icon.innerText = '🌙';
+          if (btn) btn.title = 'Тёмная тема (нажмите для включения светлой)';
+        }
+      } catch (e) {}
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('light-theme');
+      const icon = document.getElementById('themeIcon');
+      const btn = document.getElementById('themeToggleBtn');
+      if (isLight) {
+        if (icon) icon.innerText = '☀️';
+        if (btn) btn.title = 'Светлая тема (нажмите для включения тёмной)';
+        showToast('☀️ Светлая тема включена');
+      } else {
+        if (icon) icon.innerText = '🌙';
+        if (btn) btn.title = 'Тёмная тема (нажмите для включения светлой)';
+        showToast('🌙 Тёмная тема включена');
+      }
+      try {
+        localStorage.setItem('studio_theme', isLight ? 'light' : 'dark');
+      } catch (e) {}
+    }
+
+    // Draggable Resizer logic
+    function initResizer() {
+      const resizer = document.getElementById('panelResizer');
+      const outputPanel = document.getElementById('outputPanel');
+      const container = document.querySelector('.studio-container');
+      if (!resizer || !outputPanel || !container) return;
+
+      // Restore saved width from localStorage
+      try {
+        const savedWidth = localStorage.getItem('studio_output_panel_width');
+        if (savedWidth && window.innerWidth > 900) {
+          const w = parseInt(savedWidth, 10);
+          if (!isNaN(w) && w >= 320 && w <= window.innerWidth - 380) {
+            outputPanel.style.width = w + 'px';
+          }
+        }
+      } catch (e) {}
+
+      let isDragging = false;
+      let startX = 0;
+      let startWidth = 0;
+
+      resizer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startWidth = outputPanel.getBoundingClientRect().width;
+        resizer.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+
+        function onMouseMove(moveEvent) {
+          if (!isDragging) return;
+          const dx = startX - moveEvent.clientX; // Moving left increases output width
+          const newWidth = startWidth + dx;
+          const containerWidth = container.getBoundingClientRect().width;
+          const minW = 320;
+          const maxW = Math.max(minW, containerWidth - 380);
+          const clampedWidth = Math.min(Math.max(newWidth, minW), maxW);
+          outputPanel.style.width = clampedWidth + 'px';
+        }
+
+        function onMouseUp() {
+          if (!isDragging) return;
+          isDragging = false;
+          resizer.classList.remove('dragging');
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+          try {
+            localStorage.setItem('studio_output_panel_width', outputPanel.getBoundingClientRect().width);
+          } catch (e) {}
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+    }
+
+    function resetToDefaults() {
+      localStorage.removeItem('photo_studio_state_v2');
+      document.getElementById('subjectPrompt').value = '';
+      setMode('portrait-scratch');
+      setHardwareTab('dslr');
+      document.getElementById('photographerSelect').value = 'Peter Lindbergh';
+      onPhotographerSelectChange();
+      document.getElementById('lightingCategory').value = 'studio';
+      onLightingCategoryChange();
+      setAspectRatio('16:9');
+      updatePrompt();
+      showToast('Сброшено к исходным настройкам.');
+    }
+
+    // Run on startup safely
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
