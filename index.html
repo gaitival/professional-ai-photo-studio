@@ -1619,7 +1619,7 @@
               ➕ Сохранить как новый
             </button>
             <button class="preset-dropdown-action-btn secondary preset-reset-btn-label" onclick="resetPresetsToDefault()">
-              ↺ Сброс (22)
+              ↺ Сброс (23)
             </button>
           </div>
         </div>
@@ -1645,7 +1645,7 @@
     <div class="mobile-sheet-handle"></div>
     <div class="mobile-sheet-header">
       <div class="mobile-sheet-title">
-        <span>⚡</span> СТУДИЙНЫЕ СЕТАПЫ <span class="tag" id="mobileSheetHeaderTag">22 пресета</span>
+        <span>⚡</span> СТУДИЙНЫЕ СЕТАПЫ <span class="tag" id="mobileSheetHeaderTag">23 пресета</span>
       </div>
       <button class="mobile-sheet-close-btn" type="button" onclick="closeMobilePresetSheet()" title="Закрыть">✕</button>
     </div>
@@ -1659,7 +1659,7 @@
         ➕ Сохранить как новый
       </button>
       <button class="preset-dropdown-action-btn secondary preset-reset-btn-label" onclick="resetPresetsToDefault()">
-        ↺ Сброс (22)
+        ↺ Сброс (23)
       </button>
     </div>
   </div>
@@ -1751,6 +1751,7 @@
               <option value="Mario Testino">Mario Testino (Сочный свет, динамика, гламурная роскошь)</option>
               <option value="Gregory Crewdson">Gregory Crewdson (Кинематографичная меланхолия, сумерки, сложный свет)</option>
               <option value="Nan Goldin">Nan Goldin (Сырая интимность, плёночный гранж 90-х)</option>
+              <option value="Massimo Dutti">Massimo Dutti (Премиальный лукбук, сдержанная элегантность)</option>
               <option value="custom">-- Свой фотограф или стиль --</option>
             </select>
           </div>
@@ -1824,6 +1825,7 @@
               <option value="Anamorphic Streak Filter with delicate horizontal blue flares">Anamorphic Streak Filter (Синие анаморфные блики)</option>
               <option value="Hollywood Black Magic 1/8 diffusion filter">Hollywood Black Magic 1/8 (Киношная мягкость кожи)</option>
               <option value="1.33x anamorphic squeeze lens adapter with characteristic oval bokeh">1.33x Anamorphic Lens (Овальное боке)</option>
+              <option value="Anamorphic Filter (1.33x or 1.5x squeeze): shot with anamorphic lens/filter, horizontal cinematic lens flares, oval bokeh, widescreen cinematic aesthetic, premiere director-level look">Anamorphic Filter 1.33x/1.5x (Weavy кино-анаморф, овальное боке и блики)</option>
               <option value="Circular Polarizer (CPL) eliminating specular glare and deepening rich contrast">Поляризационный фильтр CPL (Глубокий контраст)</option>
             </select>
           </div>
@@ -2093,12 +2095,14 @@
     const hardwareDB = {
       dslr: {
         cameras: [
+          'Pentax K-1 Mark II (36.4MP Full-Frame CMOS sensor)',
           'Canon EOS 5D Mark IV (30.4MP Full-Frame CMOS sensor)',
           'Canon EOS-1D X Mark III (Flagship 20.1MP Full-Frame)',
           'Nikon D850 (45.7MP Back-Illuminated Full-Frame)',
           'Nikon D6 Professional DSLR'
         ],
         lenses: [
+          'Pentax HD D FA 24-70mm f/2.8 ED SDM WR (Sharp versatile framing)',
           'Canon EF 85mm f/1.4L IS USM (Creamy editorial compression)',
           'Canon EF 50mm f/1.2L USM (Ultra-shallow depth of field)',
           'Canon EF 24-70mm f/2.8L II USM (Sharp versatile framing)',
@@ -2207,6 +2211,7 @@
         'Overcast moody daylight with shadowless milky diffusion and cold serene blue ambient bounce'
       ],
       mood: [
+        'Restaurant: Soft, angled lighting. Sculpted feel with triangle of light under one eye (как в Weavy)',
         'Restaurant soft, angled lighting combined with dramatic volumetric atmospheric backlight (полный сетап из Weavy)',
         'Restaurant soft, angled lighting with delicate ambient falloff (как в Weavy)',
         'Dramatic volumetric atmospheric light shafts with warm golden highlights and deep shadow contrast (как в Weavy)',
@@ -2773,7 +2778,7 @@
       showToast('⭐ Оригинальный сетап Weavy (Contax G2 + Vision3 500T + f/2.0) активирован!');
     }
 
-    // Curated Default Studio Presets (11 Presets)
+    // Curated Default Studio Presets (23 Presets)
     const defaultStudioPresets = [
       {
         id: 'preset_model_clothing',
@@ -3047,7 +3052,7 @@
       },
       {
         id: 'preset_luxury_handbag',
-        name: 'Luxury Handbag — премиальная карточка сумки',
+        name: '11. Luxury Handbag — премиальная карточка сумки',
         data: {
           mode: 'product-scratch',
           hwTab: 'dslr',
@@ -3074,7 +3079,7 @@
       },
       {
         id: 'preset_weavy',
-        name: '⭐ Weavy Cult Film (Contax G2 & CineStill)',
+        name: '12. ⭐ Weavy Cult Film (Contax G2 & CineStill)',
         data: {
           mode: 'product-ref',
           hwTab: 'film_range',
@@ -3101,7 +3106,7 @@
       },
       {
         id: 'preset_nordic_homewear',
-        name: '🛌 Nordic Morning Homewear (Hasselblad)',
+        name: '13. 🛌 Nordic Morning Homewear (Hasselblad)',
         data: {
           mode: 'product-ref',
           hwTab: 'mirrorless',
@@ -3128,7 +3133,7 @@
       },
       {
         id: 'preset_silk_vogue',
-        name: '✨ Silk & Velvet Vogue Editorial (Paolo Roversi)',
+        name: '14. ✨ Silk & Velvet Vogue Editorial (Paolo Roversi)',
         data: {
           mode: 'portrait-scratch',
           hwTab: 'mirrorless',
@@ -3155,7 +3160,7 @@
       },
       {
         id: 'preset_clean_commercial',
-        name: '🏷️ Clean Commercial E-Commerce (Zara & Apple)',
+        name: '15. 🏷️ Clean Commercial E-Commerce (Zara & Apple)',
         data: {
           mode: 'product-ref',
           hwTab: 'dslr',
@@ -3182,7 +3187,7 @@
       },
       {
         id: 'preset_golden_lifestyle',
-        name: '☕ Warm Golden Hour Cozy Home (Portra 400)',
+        name: '16. ☕ Warm Golden Hour Cozy Home (Portra 400)',
         data: {
           mode: 'product-ref',
           hwTab: 'film_slr',
@@ -3209,7 +3214,7 @@
       },
       {
         id: 'preset_glossy_beauty',
-        name: 'Glossy Beauty — журнальный бьюти-портрет',
+        name: '17. 💄 Glossy Beauty — журнальный бьюти-портрет',
         data: {
           mode: 'portrait-scratch',
           hwTab: 'dslr',
@@ -3236,7 +3241,7 @@
       },
       {
         id: 'preset_natural_bw',
-        name: 'Natural B&W — естественный портрет в духе Peter Lindbergh',
+        name: '18. 🖤 Natural B&W — естественный портрет в духе Peter Lindbergh',
         data: {
           mode: 'portrait-scratch',
           hwTab: 'film_slr',
@@ -3263,7 +3268,7 @@
       },
       {
         id: 'preset_soft_couture',
-        name: 'Soft Couture — романтическая съёмка в духе Paolo Roversi',
+        name: '19. 🌸 Soft Couture — романтическая съёмка в духе Paolo Roversi',
         data: {
           mode: 'portrait-scratch',
           hwTab: 'mirrorless',
@@ -3290,7 +3295,7 @@
       },
       {
         id: 'preset_fashion_cover',
-        name: 'Fashion Cover — чёткий студийный кадр для обложки',
+        name: '20. 📸 Fashion Cover — чёткий студийный кадр для обложки',
         data: {
           mode: 'portrait-scratch',
           hwTab: 'mirrorless',
@@ -3317,7 +3322,7 @@
       },
       {
         id: 'preset_sculpted_portrait',
-        name: 'Sculpted Portrait — драматичный портрет девушки или мужчины',
+        name: '21. 🎭 Sculpted Portrait — драматичный портрет девушки или мужчины',
         data: {
           mode: 'portrait-scratch',
           hwTab: 'dslr',
@@ -3344,7 +3349,7 @@
       },
       {
         id: 'preset_golden_editorial',
-        name: 'Golden Editorial — тёплая журнальная съёмка на улице',
+        name: '22. 🌅 Golden Editorial — тёплая журнальная съёмка на улице',
         data: {
           mode: 'portrait-scratch',
           hwTab: 'mirrorless',
@@ -3368,12 +3373,39 @@
           aspectRatio: '4:5',
           prompt: 'Поясной fashion-портрет на закате, модель слегка поворачивается к камере, лёгкий ветер двигает волосы. Солнце позади и сбоку создаёт золотистый контур, мягкое отражённое заполнение освещает лицо. Глаза резкие, фон плавно размыт, оттенок кожи естественный, без чрезмерной оранжевой тонировки.'
         }
+      },
+      {
+        id: 'preset_massimo_dutti',
+        name: '23. 👗 Massimo Dutti Editorial — кампейн у зеркала (Pentax K-1 & ARRI LogC)',
+        data: {
+          mode: 'portrait-scratch',
+          hwTab: 'dslr',
+          camera: 'Pentax K-1 Mark II (36.4MP Full-Frame CMOS sensor)',
+          lens: 'Pentax HD D FA 24-70mm f/2.8 ED SDM WR (Sharp versatile framing)',
+          shutter: '1/125s',
+          aperture: 'f/2.8',
+          iso: 'Auto ISO (up to 6400)',
+          focusFormat: 'AF-C, uncompressed RAW + JPEG output',
+          colorGrading: 'Color graded with ARRI Alexa LogC to Rec.709 LUT with subtle highlight roll-off',
+          filter: 'Anamorphic Filter (1.33x or 1.5x squeeze): shot with anamorphic lens/filter, horizontal cinematic lens flares, oval bokeh, widescreen cinematic aesthetic, premiere director-level look',
+          lightingCategory: 'mood',
+          lightingSetup: 'Restaurant: Soft, angled lighting. Sculpted feel with triangle of light under one eye (как в Weavy)',
+          angle: 'medium_long: Medium-long shot capturing model, clothing drape and room atmosphere',
+          texture: 'Volumetric Atmospheric Texture: subtle volumetric atmospheric texture, faint airborne dust motes caught in light rays, adding depth and live-in realism to the environment',
+          photographer: 'Massimo Dutti',
+          includePhotographerMeta: true,
+          aspectRatio: '4:5',
+          humanEyes: true,
+          humanSkin: true,
+          materials: true,
+          prompt: 'Красивая молодая женщина, естественный макияж и причёска. На ней пудрово-розовый шёлковый топ и небольшие золотые серьги. Она сидит перед зеркалом в гримёрной, поворачивает голову к камере и едва улыбается. Под тёплым светом отражаются зеркала мягкими размытыми огнями. Акцент на взгляде, естественной коже и блеске шёлка; камерная атмосфера модной съёмки после последнего кадра. Вертикальный формат 4:5, без надписей и логотипов.'
+        }
       }
     ];
 
     function getPresetsList() {
       try {
-        const raw = localStorage.getItem('studio_vault_presets_v5');
+        const raw = localStorage.getItem('studio_vault_presets_v6');
         if (raw) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -3384,7 +3416,7 @@
 
     function savePresetsList(list) {
       try {
-        localStorage.setItem('studio_vault_presets_v5', JSON.stringify(list));
+        localStorage.setItem('studio_vault_presets_v6', JSON.stringify(list));
       } catch (e) {}
     }
 
@@ -3660,6 +3692,7 @@
 
     function resetPresetsToDefault() {
       if (!confirm(`Сбросить панель сетапов к исходным ${defaultStudioPresets.length} сетапам? Все ваши изменения в сетапах будут сброшены.`)) return;
+      localStorage.removeItem('studio_vault_presets_v6');
       localStorage.removeItem('studio_vault_presets_v5');
       localStorage.removeItem('studio_vault_presets_v4');
       localStorage.removeItem('studio_vault_presets_v3');
