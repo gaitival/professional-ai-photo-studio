@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <!-- Body Gradient -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a3241"/>
+      <stop offset="50%" stop-color="#19202c"/>
+      <stop offset="100%" stop-color="#0f131a"/>
+    </linearGradient>
+    
+    <!-- Top Prism Gradient -->
+    <linearGradient id="prismGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3b4556"/>
+      <stop offset="100%" stop-color="#1f2735"/>
+    </linearGradient>
+    
+    <!-- Metallic Shutter / Dial -->
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="50%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+
+    <!-- Outer Lens Ring (Pro Blue Glow) -->
+    <linearGradient id="lensRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="50%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+
+    <!-- Deep Multicoated Optical Glass -->
+    <radialGradient id="glassGrad" cx="38%" cy="36%" r="65%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="45%" stop-color="#0f172a"/>
+      <stop offset="85%" stop-color="#090d16"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </radialGradient>
+    
+    <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Shadow below camera -->
+  <ellipse cx="32" cy="59" rx="24" ry="3.5" fill="#000000" opacity="0.45"/>
+
+  <!-- Shutter Button (Left) -->
+  <rect x="13" y="10" width="10" height="5" rx="2" fill="url(#metalGrad)" />
+  <rect x="15" y="8" width="6" height="3" rx="1.5" fill="#94a3b8" />
+
+  <!-- Dial (Right) -->
+  <rect x="43" y="11" width="9" height="4" rx="1.5" fill="url(#metalGrad)" />
+
+  <!-- Pentaprism / Viewfinder Top -->
+  <path d="M 22 16 L 26 9 C 26.5 8.2 27.2 8 28 8 L 36 8 C 36.8 8 37.5 8.2 38 9 L 42 16 Z" fill="url(#prismGrad)" stroke="#111620" stroke-width="0.8"/>
+  <!-- Hot Shoe -->
+  <rect x="27.5" y="7" width="9" height="2" rx="0.5" fill="#64748b"/>
+
+  <!-- Main Camera Body -->
+  <rect x="6" y="15" width="52" height="42" rx="9" fill="url(#bodyGrad)" stroke="#384355" stroke-width="1.2" filter="url(#subtleGlow)"/>
+
+  <!-- Textured Grip (Right edge) -->
+  <path d="M 48 18 H 53 C 56 18 57 20 57 23 V 49 C 57 52 56 54 53 54 H 48 Z" fill="#121720" opacity="0.7"/>
+  <line x1="50" y1="22" x2="50" y2="50" stroke="#1f2937" stroke-width="1" stroke-dasharray="2,2"/>
+  <line x1="53" y1="22" x2="53" y2="50" stroke="#1f2937" stroke-width="1" stroke-dasharray="2,2"/>
+
+  <!-- Red Accent Dot / Sensor (Leica / Studio indicator) -->
+  <circle cx="15" cy="23" r="2.2" fill="#ef4444" stroke="#991b1b" stroke-width="0.5"/>
+
+  <!-- AF Assist / Flash Lamp (Top-right of lens) -->
+  <circle cx="43" cy="23" r="2.2" fill="#f59e0b" stroke="#78350f" stroke-width="0.5"/>
+  <circle cx="43" cy="23" r="0.8" fill="#fef3c7"/>
+
+  <!-- LENS ASSEMBLY -->
+  <!-- Outer Barrel -->
+  <circle cx="32" cy="37" r="17.5" fill="#0d1117" stroke="url(#lensRingGrad)" stroke-width="2"/>
+  
+  <!-- Outer Ridged Ring -->
+  <circle cx="32" cy="37" r="14.5" fill="#151b26" stroke="#252f3f" stroke-width="1"/>
+
+  <!-- Deep Optical Glass -->
+  <circle cx="32" cy="37" r="11.5" fill="url(#glassGrad)"/>
+
+  <!-- Aperture Pupil -->
+  <circle cx="32" cy="37" r="6" fill="#070a10" stroke="#1e293b" stroke-width="0.8"/>
+
+  <!-- Primary Arc Flare (Cyan/White Reflection) -->
+  <path d="M 25 31 C 28 28 34 28 37 30" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.85"/>
+  
+  <!-- Secondary Subtle Warm Flare (Magenta/Amber) -->
+  <path d="M 27 43 C 30 45 35 45 38 42" stroke="#c084fc" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.6"/>
+
+  <!-- Bright Specular Sparkle -->
+  <circle cx="27" cy="31" r="1.3" fill="#ffffff" opacity="0.95"/>
+</svg>
